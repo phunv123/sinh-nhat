@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hiệu Ứng Đếm Ngược Hạt 3D</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;700;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            overflow: hidden;
+            background-color: #000000;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        #webgl-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            z-index: 1;
+        }
+
+        #gift-click-zone {
+            position: fixed;
+            top: 58%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 250px;
+            height: 250px;
+            z-index: 10;
+            cursor: pointer;
+            border-radius: 50%;
+            background-color: transparent;
+        }
+
+        /* --- GỢI Ý TƯƠNG TÁC --- */
+        .click-hint {
+            position: fixed;
+            bottom: 22%;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            font-size: 14px;
+            font-weight: 300;
+            color: rgba(255, 180, 210, 0.6);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            pointer-events: none;
+            text-shadow: 0 0 18px rgba(255, 105, 180, 0.5);
+            animation: pulseHint 2.5s infinite alternate ease-in-out;
+            transition: all 0.8s ease;
+            white-space: nowrap;
+        }
+
+        .click-hint.hidden {
+            opacity: 0;
+            transform: translateX(-50%) translateY(20px);
+            filter: blur(12px);
+        }
+
+        @keyframes pulseHint {
+            0% { opacity: 0.35; }
+            100% { opacity: 0.95; }
+        }
+
+        /* --- BẢNG ĐIỀU KHIỂN DEBUG SANG TRỌNG --- */
+        .control-panel {
+            position: fixed;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            display: flex;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            padding: 8px 18px;
+            border-radius: 30px;
+            box-shadow: 0 8px 32px 0 rgba(255, 105, 180, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .control-btn {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.7);
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            font-family: 'Montserrat', sans-serif;
+            white-space: nowrap;
+        }
+
+        .control-btn:hover {
+            background: rgba(255, 105, 180, 0.2);
+            border-color: rgba(255, 105, 180, 0.4);
+            color: #ffffff;
+            box-shadow: 0 0 15px rgba(255, 105, 180, 0.35);
+            transform: translateY(-2px);
+        }
+
+        .control-btn:active {
+            transform: translateY(0);
+        }
+
+        .control-btn.active {
+            background: linear-gradient(135deg, #ff5e97, #ff8cb6);
+            border-color: transparent;
+            color: #ffffff;
+            box-shadow: 0 4px 15px rgba(255, 94, 151, 0.45);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="webgl-canvas"></div>
+    <div id="gift-click-zone"></div>
+    <div class="click-hint" id="click-hint">✨ Chạm để mở quà ✨</div>
+
+    <div class="control-panel" id="control-panel">
+        <button class="control-btn active" id="btn-gift">Hộp quà</button>
+        <button class="control-btn" id="btn-countdown">Đếm ngược</button>
+        <button class="control-btn" id="btn-birthday">Birthday</button>
+        <button class="control-btn" id="btn-fireworks">Pháo hoa</button>
+        <button class="control-btn" id="btn-cake">Bánh kem</button>
+    </div>
+
+    <div id="debug-overlay" style="display: none; position: fixed; top: 10px; left: 10px; color: #ff80b0; z-index: 100; font-family: monospace; font-size: 14px; background: rgba(0,0,0,0.8); padding: 12px; border: 1px solid #ff5090; border-radius: 8px; pointer-events: none; max-width: 90vw; word-wrap: break-word;">
+        [Hộp quà] Đang tải...
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+
+        // --- HỆ THỐNG DEBUG BÁO LỖI TRỰC TIẾP LÊN MÀN HÌNH ---
+        const debugOverlay = document.getElementById('debug-overlay');
+        function updateDebug(msg) {
+            if (debugOverlay) {
+                debugOverlay.innerHTML = `[Hộp quà] ${msg}`;
+            }
+        }
+        window.onerror = function(message, source, lineno, colno, error) {
+            updateDebug(`<span style="color: #ff4040; font-weight: bold;">LỖI JS: ${message} (Dòng ${lineno}:${colno})</span>`);
+            return false;
+        };
+        // ----------------------------------------------------
+
+        // ═══════════════════════════════════════════════════
+        //  1. KHỞI TẠO KHÔNG GIAN 3D
+        // ═══════════════════════════════════════════════════
+        const container = document.getElementById('webgl-canvas');
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x000000, 0.0012);
+
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 3000);
+        camera.position.z = 200;
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        container.appendChild(renderer.domElement);
+
+        // ═══════════════════════════════════════════════════
+        //  2. TẠO TEXTURE HẠT LẤP LÁNH HỒNG KIM TUYẾN
+        // ═══════════════════════════════════════════════════
+        function createSparkleTexture() {
+            const size = 128;
+            const canvas = document.createElement('canvas');
+            canvas.width = size; canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            const c = size / 2;
+
+            // Lớp 1: Quầng sáng chính (radial glow)
+            const glow = ctx.createRadialGradient(c, c, 0, c, c, c);
+            glow.addColorStop(0, 'rgba(255, 255, 255, 1)');
+            glow.addColorStop(0.08, 'rgba(255, 230, 240, 0.95)');
+            glow.addColorStop(0.18, 'rgba(255, 150, 200, 0.7)');
+            glow.addColorStop(0.35, 'rgba(255, 80, 160, 0.3)');
+            glow.addColorStop(0.6, 'rgba(255, 20, 100, 0.08)');
+            glow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            ctx.fillStyle = glow;
+            ctx.fillRect(0, 0, size, size);
+
+            // Lớp 2: Tia sáng chữ thập (sparkle cross) — tạo kim tuyến lấp lánh
+            ctx.globalCompositeOperation = 'lighter';
+            
+            // Tia dọc
+            const vGrad = ctx.createLinearGradient(c, 0, c, size);
+            vGrad.addColorStop(0, 'rgba(255,255,255,0)');
+            vGrad.addColorStop(0.35, 'rgba(255,200,230,0.1)');
+            vGrad.addColorStop(0.48, 'rgba(255,255,255,0.6)');
+            vGrad.addColorStop(0.52, 'rgba(255,255,255,0.6)');
+            vGrad.addColorStop(0.65, 'rgba(255,200,230,0.1)');
+            vGrad.addColorStop(1, 'rgba(255,255,255,0)');
+            ctx.fillStyle = vGrad;
+            ctx.fillRect(c - 3, 0, 6, size);
+
+            // Tia ngang
+            const hGrad = ctx.createLinearGradient(0, c, size, c);
+            hGrad.addColorStop(0, 'rgba(255,255,255,0)');
+            hGrad.addColorStop(0.35, 'rgba(255,200,230,0.1)');
+            hGrad.addColorStop(0.48, 'rgba(255,255,255,0.6)');
+            hGrad.addColorStop(0.52, 'rgba(255,255,255,0.6)');
+            hGrad.addColorStop(0.65, 'rgba(255,200,230,0.1)');
+            hGrad.addColorStop(1, 'rgba(255,255,255,0)');
+            ctx.fillStyle = hGrad;
+            ctx.fillRect(0, c - 3, size, 6);
+
+            // Tia chéo (thêm sự lấp lánh)
+            ctx.save();
+            ctx.translate(c, c);
+            ctx.rotate(Math.PI / 4);
+            ctx.fillStyle = vGrad;
+            ctx.fillRect(-2, -c, 4, size);
+            ctx.fillStyle = hGrad;
+            ctx.fillRect(-c, -2, size, 4);
+            ctx.restore();
+
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        // ═══════════════════════════════════════════════════
+        //  3. KHỞI TẠO HỆ THỐNG HẠT HỒNG KIM TUYẾN
+        // ═══════════════════════════════════════════════════
+        function getGiftBoxCoordinates() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 800; canvas.height = 800;
+
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, 800, 800);
+            ctx.fillStyle = '#fff';
+
+            // Thân hộp quà
+            ctx.fillRect(250, 370, 300, 250);
+
+            // Nắp hộp (rộng hơn thân một chút)
+            ctx.fillRect(230, 315, 340, 60);
+
+            // Ruy băng dọc (xuyên suốt nắp + thân)
+            ctx.fillRect(378, 315, 44, 305);
+
+            // Ruy băng ngang (giữa thân)
+            ctx.fillRect(250, 470, 300, 40);
+
+            // Nơ bên trái
+            ctx.beginPath();
+            ctx.ellipse(372, 295, 52, 32, -0.35, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Nơ bên phải
+            ctx.beginPath();
+            ctx.ellipse(428, 295, 52, 32, 0.35, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Nút thắt nơ
+            ctx.beginPath();
+            ctx.arc(400, 300, 16, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Đuôi ruy-băng trái
+            ctx.beginPath();
+            ctx.moveTo(360, 305);
+            ctx.lineTo(330, 270);
+            ctx.lineTo(345, 305);
+            ctx.fill();
+
+            // Đuôi ruy-băng phải
+            ctx.beginPath();
+            ctx.moveTo(440, 305);
+            ctx.lineTo(470, 270);
+            ctx.lineTo(455, 305);
+            ctx.fill();
+
+            const imageData = ctx.getImageData(0, 0, 800, 800).data;
+            const coords = [];
+
+            for (let y = 0; y < 800; y += 3) {
+                for (let x = 0; x < 800; x += 3) {
+                    if (imageData[(y * 800 + x) * 4] > 128) {
+                        coords.push({
+                            x: (x - 400) * 0.35,
+                            y: -(y - 400) * 0.35,
+                            z: (Math.random() - 0.5) * 12
+                        });
+                    }
+                }
+            }
+            return coords;
+        }
+
+        const PARTICLE_COUNT = 16000;
+        const geometry = new THREE.BufferGeometry();
+
+        const positions = new Float32Array(PARTICLE_COUNT * 3);
+        const targetPositions = new Float32Array(PARTICLE_COUNT * 3);
+        const speeds = new Float32Array(PARTICLE_COUNT);
+        const colors = new Float32Array(PARTICLE_COUNT * 3);
+        const twinklePhase = new Float32Array(PARTICLE_COUNT);
+        const twinkleSpeed = new Float32Array(PARTICLE_COUNT);
+
+        // Lấy tọa độ hộp quà ngay khi khởi động
+        const giftCoords = getGiftBoxCoordinates();
+        // Trộn ngẫu nhiên để phân bố hạt đều trên hộp quà
+        giftCoords.sort(() => Math.random() - 0.5);
+
+        for (let i = 0; i < PARTICLE_COUNT; i++) {
+            let x, y, z;
+            if (i < giftCoords.length) {
+                x = giftCoords[i].x;
+                y = giftCoords[i].y;
+                z = giftCoords[i].z;
+            } else {
+                // Hạt dư lơ lửng xung quanh tạo nền lấp lánh
+                x = (Math.random() - 0.5) * 350;
+                y = (Math.random() - 0.5) * 350;
+                z = (Math.random() - 0.5) * 350;
+            }
+
+            positions[i * 3]     = x;
+            positions[i * 3 + 1] = y;
+            positions[i * 3 + 2] = z;
+
+            targetPositions[i * 3]     = x;
+            targetPositions[i * 3 + 1] = y;
+            targetPositions[i * 3 + 2] = z;
+
+            speeds[i] = 0.02 + Math.random() * 0.025; // Tốc độ di chuyển ban đầu mượt mà
+
+            // === Bảng màu hồng ánh kim tuyến ===
+            const roll = Math.random();
+            if (roll < 0.35) {
+                // Hot Pink rực rỡ
+                colors[i * 3]     = 1.0;
+                colors[i * 3 + 1] = 0.3 + Math.random() * 0.25;
+                colors[i * 3 + 2] = 0.6 + Math.random() * 0.2;
+            } else if (roll < 0.6) {
+                // Rose Gold / Champagne ánh kim
+                colors[i * 3]     = 1.0;
+                colors[i * 3 + 1] = 0.65 + Math.random() * 0.2;
+                colors[i * 3 + 2] = 0.7 + Math.random() * 0.2;
+            } else if (roll < 0.8) {
+                // Trắng lấp lánh (điểm nhấn sáng chói)
+                colors[i * 3]     = 1.0;
+                colors[i * 3 + 1] = 0.88 + Math.random() * 0.12;
+                colors[i * 3 + 2] = 0.92 + Math.random() * 0.08;
+            } else if (roll < 0.92) {
+                // Deep Magenta sâu
+                colors[i * 3]     = 0.85 + Math.random() * 0.15;
+                colors[i * 3 + 1] = 0.05 + Math.random() * 0.15;
+                colors[i * 3 + 2] = 0.45 + Math.random() * 0.25;
+            } else {
+                // Vàng Gold nhẹ (tạo ánh kim tuyến vàng)
+                colors[i * 3]     = 1.0;
+                colors[i * 3 + 1] = 0.82 + Math.random() * 0.15;
+                colors[i * 3 + 2] = 0.3 + Math.random() * 0.3;
+            }
+
+            twinklePhase[i] = Math.random() * Math.PI * 2;
+            twinkleSpeed[i] = 1.5 + Math.random() * 3.5;
+        }
+
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        // Sử dụng .slice() để tạo bản sao, tránh lỗi suy hao màu sắc (exponential decay) do ghi đè trực tiếp lên mảng gốc colors
+        geometry.setAttribute('color', new THREE.BufferAttribute(colors.slice(), 3));
+
+        // --- HỆ THỐNG VẬT LÝ PHÁO HOA ---
+        let currentMode = 'GIFT'; // 'GIFT', 'COUNTDOWN', 'BIRTHDAY', 'FIREWORKS', 'CAKE'
+        const vx = new Float32Array(PARTICLE_COUNT);
+        const vy = new Float32Array(PARTICLE_COUNT);
+        const vz = new Float32Array(PARTICLE_COUNT);
+        const life = new Float32Array(PARTICLE_COUNT);
+        const maxLife = new Float32Array(PARTICLE_COUNT);
+        const pState = new Uint8Array(PARTICLE_COUNT); // 0: ambient star, 1: rising shell, 2: explosion spark
+        const baseColors = colors.slice(); // Bản sao màu sắc nền để sử dụng cho pháo hoa
+        let cakeLength = 0; // Số lượng hạt trong hình bánh sinh nhật
+
+        const sparkleTexture = createSparkleTexture();
+
+        const material = new THREE.PointsMaterial({
+            size: 5,
+            map: sparkleTexture,
+            transparent: true,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+            vertexColors: true,
+            sizeAttenuation: true,
+        });
+
+        const particlesMesh = new THREE.Points(geometry, material);
+        scene.add(particlesMesh);
+        updateDebug("Đang hiển thị hộp quà. Hãy nhấp vào hộp quà để mở.");
+
+
+        // ═══════════════════════════════════════════════════
+        //  5. HÀM QUÉT SỐ/CHỮ THÀNH TỌA ĐỘ DÀY ĐẶC, RÕ NÉT
+        // ═══════════════════════════════════════════════════
+        function getTextCoordinates(text) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 900; canvas.height = 900;
+
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = '#fff';
+            ctx.font = '900 420px Montserrat, Arial, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+            const coords = [];
+
+            // Quét dày đặc mỗi 3 pixel để số cực kỳ rõ ràng
+            for (let y = 0; y < canvas.height; y += 3) {
+                for (let x = 0; x < canvas.width; x += 3) {
+                    if (imageData[(y * canvas.width + x) * 4] > 128) {
+                        coords.push({
+                            x: (x - canvas.width / 2) * 0.28,
+                            y: -(y - canvas.height / 2) * 0.28,
+                            z: (Math.random() - 0.5) * 8
+                        });
+                    }
+                }
+            }
+            return coords;
+        }
+
+        // ═══════════════════════════════════════════════════
+        //  6. HÀM MORPHING & NỔ TUNG
+        // ═══════════════════════════════════════════════════
+        function morphToShape(coords) {
+            // Trộn ngẫu nhiên để hạt bay từ nhiều hướng khác nhau
+            coords.sort(() => Math.random() - 0.5);
+
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                if (i < coords.length) {
+                    targetPositions[i * 3]     = coords[i].x;
+                    targetPositions[i * 3 + 1] = coords[i].y;
+                    targetPositions[i * 3 + 2] = coords[i].z;
+                } else {
+                    // Hạt dư bay lơ lửng gần để tạo nền sao lấp lánh
+                    targetPositions[i * 3]     = (Math.random() - 0.5) * 350;
+                    targetPositions[i * 3 + 1] = (Math.random() - 0.5) * 350;
+                    targetPositions[i * 3 + 2] = (Math.random() - 0.5) * 350;
+                }
+            }
+        }
+
+        function explodeParticles() {
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                // Hướng nổ ra ngoài từ tâm
+                const angle = Math.random() * Math.PI * 2;
+                const elevation = (Math.random() - 0.5) * Math.PI;
+                const dist = 400 + Math.random() * 800;
+
+                targetPositions[i * 3]     = Math.cos(angle) * Math.cos(elevation) * dist;
+                targetPositions[i * 3 + 1] = Math.sin(elevation) * dist;
+                targetPositions[i * 3 + 2] = Math.sin(angle) * Math.cos(elevation) * dist;
+
+                // Tăng tốc đột ngột cho hiệu ứng nổ tung
+                speeds[i] = 0.045 + Math.random() * 0.06;
+            }
+        }
+
+        function resetSpeeds() {
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                speeds[i] = 0.09 + Math.random() * 0.07; // Tăng tốc để hạt hội tụ nhanh, sắc nét trong 1 giây thực
+            }
+        }
+
+        // --- THÊM: HÀM QUÉT CHỮ HAPPY BIRTHDAY XẾP CHỒNG ---
+        function getBirthdayCoordinates() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 1000; canvas.height = 1000;
+
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = '#fff';
+            ctx.font = '900 135px Montserrat, Arial, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText("HAPPY", canvas.width / 2, canvas.height / 2 - 90);
+            ctx.fillText("BIRTHDAY", canvas.width / 2, canvas.height / 2 + 90);
+
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+            const coords = [];
+
+            for (let y = 0; y < canvas.height; y += 3) {
+                for (let x = 0; x < canvas.width; x += 3) {
+                    if (imageData[(y * canvas.width + x) * 4] > 128) {
+                        coords.push({
+                            x: (x - canvas.width / 2) * 0.28,
+                            y: -(y - canvas.height / 2) * 0.28,
+                            z: (Math.random() - 0.5) * 8
+                        });
+                    }
+                }
+            }
+            return coords;
+        }
+
+        // --- THÊM: HỆ THỐNG VẬT LÝ & KÍCH HOẠT PHÁO HOA ---
+        function triggerInitialTextBurst() {
+            currentMode = 'FIREWORKS';
+            
+            const posArr = geometry.attributes.position.array;
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                pState[i] = 2; // đặt thành hạt nổ
+                
+                const i3 = i * 3;
+                const px = posArr[i3];
+                const py = posArr[i3 + 1];
+                const pz = posArr[i3 + 2];
+                
+                const dist = Math.sqrt(px * px + py * py + pz * pz) || 1;
+                const speed = 1.8 + Math.random() * 5.5;
+                
+                // Nổ đẩy ra ngoài từ tâm chữ
+                vx[i] = (px / dist) * speed + (Math.random() - 0.5) * 2;
+                vy[i] = (py / dist) * speed + (Math.random() - 0.5) * 2;
+                vz[i] = (pz / dist) * speed + (Math.random() - 0.5) * 2;
+                
+                life[i] = 65 + Math.floor(Math.random() * 45);
+                maxLife[i] = life[i];
+                
+                // Lưu lại màu hiện tại của chữ để làm màu nền nổ
+                baseColors[i3] = colors[i3];
+                baseColors[i3 + 1] = colors[i3 + 1];
+                baseColors[i3 + 2] = colors[i3 + 2];
+            }
+            
+            updateDebug("Đang trình diễn pháo hoa chúc mừng!");
+            startContinuousFireworks();
+        }
+
+        let fireworksInterval;
+        function startContinuousFireworks() {
+            launchFirework();
+            
+            // Tần suất bắn dồn dập và hoành tráng hơn (mỗi 0.8 giây)
+            fireworksInterval = setInterval(() => {
+                if (currentMode !== 'FIREWORKS') {
+                    clearInterval(fireworksInterval);
+                    return;
+                }
+                launchFirework();
+                if (Math.random() > 0.5) {
+                    setTimeout(launchFirework, 280); // 50% bắn thêm quả kép/ba
+                }
+            }, 800);
+        }
+
+        function launchFirework() {
+            const posArr = geometry.attributes.position.array;
+            
+            const startX = (Math.random() - 0.5) * 160;
+            const startY = -260;
+            const startZ = (Math.random() - 0.5) * 80;
+            
+            const targetX = startX + (Math.random() - 0.5) * 60;
+            const targetY = 50 + Math.random() * 150;
+            const targetZ = startZ + (Math.random() - 0.5) * 60;
+            
+            const paletteType = Math.floor(Math.random() * 6);
+            let r, g, b;
+            if (paletteType === 0) { // Rose Gold hoàng gia
+                r = 1.0; g = 0.70; b = 0.75;
+            } else if (paletteType === 1) { // Neon Pink rực rỡ
+                r = 1.0; g = 0.10; b = 0.60;
+            } else if (paletteType === 2) { // Vàng Gold lấp lánh
+                r = 1.0; g = 0.85; b = 0.20;
+            } else if (paletteType === 3) { // Tím Violet huyền ảo
+                r = 0.80; g = 0.20; b = 1.0;
+            } else if (paletteType === 4) { // Xanh Neon trẻ trung
+                r = 0.20; g = 0.95; b = 1.0;
+            } else { // Xanh lục lá cây lung linh
+                r = 0.30; g = 1.0; b = 0.40;
+            }
+            
+            let tailParticlesAllocated = 0;
+            const tailCount = 45;
+            const startIndex = Math.floor(Math.random() * PARTICLE_COUNT);
+            const timeToReach = 45 + Math.floor(Math.random() * 15);
+            
+            const uy = (targetY - startY - 0.5 * (-0.06) * timeToReach * timeToReach) / timeToReach;
+            const ux = (targetX - startX) / timeToReach;
+            const uz = (targetZ - startZ) / timeToReach;
+
+            for (let k = 0; k < PARTICLE_COUNT; k++) {
+                const i = (startIndex + k) % PARTICLE_COUNT;
+                if (pState[i] === 0) {
+                    pState[i] = 1; // rocket shell spark
+                    
+                    posArr[i * 3] = startX;
+                    posArr[i * 3 + 1] = startY;
+                    posArr[i * 3 + 2] = startZ;
+                    
+                    const jitter = 0.85 + Math.random() * 0.3;
+                    vx[i] = ux * jitter;
+                    vy[i] = uy * jitter;
+                    vz[i] = uz * jitter;
+                    
+                    life[i] = Math.floor(timeToReach * (0.4 + Math.random() * 0.6));
+                    maxLife[i] = life[i];
+                    
+                    baseColors[i * 3] = r;
+                    baseColors[i * 3 + 1] = g;
+                    baseColors[i * 3 + 2] = b;
+                    
+                    tailParticlesAllocated++;
+                    if (tailParticlesAllocated >= tailCount) break;
+                }
+            }
+            
+            setTimeout(() => {
+                explodeAt(targetX, targetY, targetZ, r, g, b);
+            }, timeToReach * 16.6);
+        }
+
+        function explodeAt(ex, ey, ez, r, g, b) {
+            const posArr = geometry.attributes.position.array;
+            let explodedParticlesCount = 0;
+            
+            // Tăng số lượng hạt vụ nổ lên đáng kể (1200 - 1800 hạt) giúp pháo hoa dày đặc, rõ nét
+            const burstCount = 1200 + Math.floor(Math.random() * 600);
+            const startIndex = Math.floor(Math.random() * PARTICLE_COUNT);
+            const isMulticolor = Math.random() > 0.65; // 35% cơ hội nổ pháo hoa đa sắc cầu vồng
+            
+            for (let k = 0; k < PARTICLE_COUNT; k++) {
+                const i = (startIndex + k) % PARTICLE_COUNT;
+                if (pState[i] === 0) {
+                    pState[i] = 2; // explosion spark
+                    
+                    posArr[i * 3] = ex;
+                    posArr[i * 3 + 1] = ey;
+                    posArr[i * 3 + 2] = ez;
+                    
+                    const theta = Math.random() * Math.PI * 2;
+                    const phi = Math.acos((Math.random() - 0.5) * 2);
+                    // Tốc độ bay toả ra lớn hơn để vòng tròn pháo hoa mở rộng rực rỡ
+                    const speed = 2.0 + Math.random() * 6.5;
+                    
+                    vx[i] = Math.sin(phi) * Math.cos(theta) * speed;
+                    vy[i] = Math.sin(phi) * Math.sin(theta) * speed;
+                    vz[i] = Math.cos(phi) * speed;
+                    
+                    life[i] = 50 + Math.floor(Math.random() * 35);
+                    maxLife[i] = life[i];
+                    
+                    if (isMulticolor) {
+                        // Chọn màu ngẫu nhiên cầu vồng cho từng hạt trong vụ nổ
+                        const roll = Math.random();
+                        if (roll < 0.2) {
+                            baseColors[i * 3] = 1.0; baseColors[i * 3 + 1] = 0.15; baseColors[i * 3 + 2] = 0.55; // Pink
+                        } else if (roll < 0.4) {
+                            baseColors[i * 3] = 1.0; baseColors[i * 3 + 1] = 0.85; baseColors[i * 3 + 2] = 0.20; // Gold
+                        } else if (roll < 0.6) {
+                            baseColors[i * 3] = 0.25; baseColors[i * 3 + 1] = 0.92; baseColors[i * 3 + 2] = 1.0; // Cyan
+                        } else if (roll < 0.8) {
+                            baseColors[i * 3] = 0.80; baseColors[i * 3 + 1] = 0.20; baseColors[i * 3 + 2] = 1.0; // Violet
+                        } else {
+                            baseColors[i * 3] = 0.30; baseColors[i * 3 + 1] = 1.0; baseColors[i * 3 + 2] = 0.40; // Green
+                        }
+                    } else {
+                        // Nổ một tông màu đồng đều tuyệt mỹ
+                        const varColor = 0.85 + Math.random() * 0.15;
+                        baseColors[i * 3] = r * varColor;
+                        baseColors[i * 3 + 1] = g * varColor;
+                        baseColors[i * 3 + 2] = b * varColor;
+                    }
+                    
+                    explodedParticlesCount++;
+                    if (explodedParticlesCount >= burstCount) break;
+                }
+            }
+        }
+
+        // --- THÊM: HÀM DỰNG HÌNH BÁNH SINH NHẬT 3D ---
+        function getCakeCoordinates() {
+            const coords = [];
+
+            // Hàm vẽ một tầng bánh hình trụ tròn
+            function addCylinder(radius, height, yOffset, density) {
+                const circumference = 2 * Math.PI * radius;
+                const stepsTheta = Math.floor(circumference * density);
+                const stepsY = Math.floor(height * density);
+
+                // Vẽ mặt xung quanh
+                for (let j = 0; j < stepsY; j++) {
+                    const y = yOffset + (j / stepsY) * height;
+                    for (let i = 0; i < stepsTheta; i++) {
+                        const theta = (i / stepsTheta) * Math.PI * 2;
+                        coords.push({
+                            x: Math.cos(theta) * radius,
+                            y: y,
+                            z: Math.sin(theta) * radius
+                        });
+                    }
+                }
+
+                // Vẽ mặt nắp trên phẳng
+                const radialSteps = Math.floor(radius * density);
+                for (let r = 1; r <= radialSteps; r++) {
+                    const curR = (r / radialSteps) * radius;
+                    const stepsCircle = Math.floor(2 * Math.PI * curR * density);
+                    for (let i = 0; i < stepsCircle; i++) {
+                        const theta = (i / stepsCircle) * Math.PI * 2;
+                        coords.push({
+                            x: Math.cos(theta) * curR,
+                            y: yOffset + height,
+                            z: Math.sin(theta) * curR
+                        });
+                    }
+                }
+            }
+
+            // Vẽ các tầng bánh: Tầng dưới (bự nhất), tầng giữa, tầng trên (nhỏ nhất)
+            addCylinder(50, 32, -45, 0.7);
+            addCylinder(36, 26, -13, 0.7);
+            addCylinder(22, 22, 13, 0.7);
+
+            // Thêm cây nến nhỏ trên đỉnh
+            addCylinder(3, 16, 35, 0.8);
+
+            // Thêm ngọn lửa nến lấp lánh (dùng cụm hạt dày)
+            const flamePointsCount = 150;
+            for (let i = 0; i < flamePointsCount; i++) {
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.acos((Math.random() - 0.5) * 2);
+                const r = Math.random() * 5.0;
+                coords.push({
+                    x: Math.cos(theta) * Math.sin(phi) * r,
+                    y: 54 + (Math.random() - 0.2) * 7, // Hơi thon dài lên trên
+                    z: Math.sin(theta) * Math.sin(phi) * r
+                });
+            }
+
+            // Xáo trộn ngẫu nhiên để các hạt bay vào vị trí bánh sinh nhật từ mọi phía đều đặn
+            coords.sort(() => Math.random() - 0.5);
+            return coords;
+        }
+
+        function triggerCakeStage() {
+            currentMode = 'CAKE';
+            updateDebug("Đang bày bánh sinh nhật lung linh!");
+
+            // Dừng bắn pháo hoa
+            if (fireworksInterval) clearInterval(fireworksInterval);
+
+            // Đưa toàn bộ các hạt về trạng thái ambient để sẵn sàng di chuyển (lerp) về bánh
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                pState[i] = 0;
+            }
+
+            const cakeCoords = getCakeCoordinates();
+            cakeLength = cakeCoords.length;
+            
+            morphToShape(cakeCoords);
+            resetSpeeds();
+        }
+
+        // ═══════════════════════════════════════════════════
+        //  7. VÒNG LẶP ANIMATION — LẤP LÁNH & CHUYỂN ĐỘNG
+        // ═══════════════════════════════════════════════════
+        const clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const posArr = geometry.attributes.position.array;
+            const colArr = geometry.attributes.color.array;
+            const elapsed = clock.getElapsedTime();
+
+            if (currentMode === 'FIREWORKS') {
+                for (let i = 0; i < PARTICLE_COUNT; i++) {
+                    const i3 = i * 3;
+                    
+                    if (pState[i] === 1) { // Rising rocket shell spark
+                        posArr[i3]     += vx[i];
+                        posArr[i3 + 1] += vy[i];
+                        posArr[i3 + 2] += vz[i];
+                        
+                        vy[i] -= 0.06; // Trọng lực nhẹ
+                        
+                        life[i]--;
+                        if (life[i] <= 0) {
+                            pState[i] = 0; // Trở lại sao nền khi tàn
+                        }
+                        
+                        const ratio = Math.max(0, life[i] / maxLife[i]);
+                        colArr[i3]     = baseColors[i3]     * ratio * 1.8;
+                        colArr[i3 + 1] = baseColors[i3 + 1] * ratio * 1.8;
+                        colArr[i3 + 2] = baseColors[i3 + 2] * ratio * 1.8;
+                        
+                    } else if (pState[i] === 2) { // Explosion particle
+                        posArr[i3]     += vx[i];
+                        posArr[i3 + 1] += vy[i];
+                        posArr[i3 + 2] += vz[i];
+                        
+                        vy[i] -= 0.07; // Trọng lực rơi tự do
+                        vx[i] *= 0.965; // Lực cản không khí
+                        vy[i] *= 0.965;
+                        vz[i] *= 0.965;
+                        
+                        life[i]--;
+                        if (life[i] <= 0) {
+                            pState[i] = 0; // Biến thành sao nền khi tắt hẳn
+                        }
+                        
+                        const ratio = Math.max(0, life[i] / maxLife[i]);
+                        colArr[i3]     = baseColors[i3]     * ratio * 2.0;
+                        colArr[i3 + 1] = baseColors[i3 + 1] * ratio * 2.0;
+                        colArr[i3 + 2] = baseColors[i3 + 2] * ratio * 2.0;
+                        
+                    } else { // Ambient/inactive star
+                        // Từ từ trôi về vị trí nền ban đầu
+                        posArr[i3]     += (targetPositions[i3]     - posArr[i3])     * 0.02;
+                        posArr[i3 + 1] += (targetPositions[i3 + 1] - posArr[i3 + 1]) * 0.02;
+                        posArr[i3 + 2] += (targetPositions[i3 + 2] - posArr[i3 + 2]) * 0.02;
+                        
+                        const twinkle = Math.sin(elapsed * twinkleSpeed[i] + twinklePhase[i]);
+                        const boost = twinkle > 0.85 ? 1.5 : 1.0;
+                        colArr[i3]     = colors[i3]     * (0.35 + twinkle * 0.15) * boost;
+                        colArr[i3 + 1] = colors[i3 + 1] * (0.35 + twinkle * 0.15) * boost;
+                        colArr[i3 + 2] = colors[i3 + 2] * (0.35 + twinkle * 0.15) * boost;
+                    }
+                }
+            } else if (currentMode === 'CAKE') {
+                // Quay bánh chậm rãi
+                particlesMesh.rotation.y = elapsed * 0.15;
+                particlesMesh.rotation.x = Math.sin(elapsed * 0.2) * 0.03;
+
+                for (let i = 0; i < PARTICLE_COUNT; i++) {
+                    const i3 = i * 3;
+
+                    posArr[i3]     += (targetPositions[i3]     - posArr[i3])     * speeds[i];
+                    posArr[i3 + 1] += (targetPositions[i3 + 1] - posArr[i3 + 1]) * speeds[i];
+                    posArr[i3 + 2] += (targetPositions[i3 + 2] - posArr[i3 + 2]) * speeds[i];
+
+                    const twinkle = Math.sin(elapsed * twinkleSpeed[i] + twinklePhase[i]);
+                    const boost = twinkle > 0.85 ? 1.5 : 1.0;
+                    
+                    // Kiểm tra xem hạt có thuộc ngọn lửa nến không (150 hạt cuối của bánh sinh nhật)
+                    if (i >= cakeLength - 150 && i < cakeLength) {
+                        // Ngọn lửa màu cam vàng rực rỡ lấp lánh nhấp nháy
+                        colArr[i3]     = 1.0 * (0.8 + twinkle * 0.2) * boost;
+                        colArr[i3 + 1] = (0.55 + Math.sin(elapsed * 5.0 + i) * 0.15) * (0.8 + twinkle * 0.2) * boost;
+                        colArr[i3 + 2] = 0.0;
+                    } else {
+                        // Thân bánh màu hồng lấp lánh mặc định
+                        colArr[i3]     = colors[i3]     * (0.85 + twinkle * 0.15) * boost;
+                        colArr[i3 + 1] = colors[i3 + 1] * (0.85 + twinkle * 0.15) * boost;
+                        colArr[i3 + 2] = colors[i3 + 2] * (0.85 + twinkle * 0.15) * boost;
+                    }
+                }
+            } else {
+                // Di chuyển lerp về hình dạng đích cho GIFT, COUNTDOWN, BIRTHDAY
+                for (let i = 0; i < PARTICLE_COUNT; i++) {
+                    const i3 = i * 3;
+
+                    posArr[i3]     += (targetPositions[i3]     - posArr[i3])     * speeds[i];
+                    posArr[i3 + 1] += (targetPositions[i3 + 1] - posArr[i3 + 1]) * speeds[i];
+                    posArr[i3 + 2] += (targetPositions[i3 + 2] - posArr[i3 + 2]) * speeds[i];
+
+                    const twinkle = Math.sin(elapsed * twinkleSpeed[i] + twinklePhase[i]);
+                    const boost = twinkle > 0.85 ? 1.5 : 1.0;
+                    
+                    colArr[i3]     = colors[i3]     * (0.85 + twinkle * 0.15) * boost;
+                    colArr[i3 + 1] = colors[i3 + 1] * (0.85 + twinkle * 0.15) * boost;
+                    colArr[i3 + 2] = colors[i3 + 2] * (0.85 + twinkle * 0.15) * boost;
+                }
+            }
+
+            geometry.attributes.position.needsUpdate = true;
+            geometry.attributes.color.needsUpdate = true;
+
+            if (window.frameCount === undefined) window.frameCount = 0;
+            window.frameCount++;
+            if (window.frameCount % 30 === 0) {
+                let stateText = "Đang hiển thị hộp quà";
+                if (currentMode === 'COUNTDOWN') stateText = "Đang đếm ngược";
+                else if (currentMode === 'BIRTHDAY') stateText = "Đang hiển thị Happy Birthday";
+                else if (currentMode === 'FIREWORKS') stateText = "Đang trình diễn pháo hoa";
+                else if (currentMode === 'CAKE') stateText = "Đang hiển thị bánh sinh nhật";
+                updateDebug(`${stateText}.<br>Hạt 0: (${posArr[0].toFixed(1)}, ${posArr[1].toFixed(1)}, ${posArr[2].toFixed(1)}) | Màu: (${colArr[0].toFixed(2)}, ${colArr[1].toFixed(2)}, ${colArr[2].toFixed(2)})`);
+            }
+
+            // Hiệu ứng kích thước nhấp nháy toàn cục: hạt pháo hoa to hơn, rực rỡ hơn
+            if (currentMode === 'FIREWORKS') {
+                material.size = 7.5 + Math.sin(elapsed * 2.8) * 1.3 + Math.sin(elapsed * 6.0) * 0.6;
+            } else {
+                material.size = 5 + Math.sin(elapsed * 1.8) * 0.7 + Math.sin(elapsed * 4.5) * 0.4;
+            }
+
+            // Xoay nhẹ bồng bềnh (chỉ khi không ở chế độ bánh sinh nhật)
+            if (currentMode !== 'CAKE') {
+                particlesMesh.rotation.y = Math.sin(elapsed * 0.12) * 0.06;
+                particlesMesh.rotation.x = Math.cos(elapsed * 0.08) * 0.02;
+            }
+
+            // Hiệu ứng lơ lửng nhấp nhô lên xuống (floating bob)
+            particlesMesh.position.y = Math.sin(elapsed * 0.5) * 5;
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Responsive
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // ═══════════════════════════════════════════════════
+        //  8. KỊCH BẢN CHÍNH: HỘP QUÀ → NỔ TUNG → ĐẾM NGƯỢC → HAPPY BIRTHDAY → PHÁO HOA
+        // ═══════════════════════════════════════════════════
+        const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+        const hintEl = document.getElementById('click-hint');
+        const clickZone = document.getElementById('gift-click-zone');
+        const loadTime = Date.now();
+
+        // Xử lý click: mở quà → nổ tung → đếm ngược
+        let giftOpened = false;
+        let currentSequenceId = 0;
+
+        function updateActiveButton(stageId) {
+            document.querySelectorAll('.control-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            const activeBtn = document.getElementById(`btn-${stageId}`);
+            if (activeBtn) activeBtn.classList.add('active');
+        }
+
+        async function showGiftStage() {
+            currentSequenceId++;
+            currentMode = 'GIFT';
+            giftOpened = false;
+            updateActiveButton('gift');
+            
+            // Hiện vùng click và chữ gợi ý
+            clickZone.style.pointerEvents = 'auto';
+            clickZone.style.display = 'block';
+            hintEl.classList.remove('hidden');
+            
+            if (fireworksInterval) clearInterval(fireworksInterval);
+            for (let i = 0; i < PARTICLE_COUNT; i++) pState[i] = 0;
+            
+            particlesMesh.rotation.set(0, 0, 0);
+
+            updateDebug("Đang hiển thị hộp quà. Hãy nhấp vào hộp quà để mở.");
+            morphToShape(giftCoords);
+            resetSpeeds();
+        }
+
+        async function showCountdownStage() {
+            currentSequenceId++;
+            const seqId = currentSequenceId;
+            currentMode = 'COUNTDOWN';
+            giftOpened = true;
+            updateActiveButton('countdown');
+            
+            clickZone.style.pointerEvents = 'none';
+            clickZone.style.display = 'none';
+            hintEl.classList.add('hidden');
+            
+            if (fireworksInterval) clearInterval(fireworksInterval);
+            for (let i = 0; i < PARTICLE_COUNT; i++) pState[i] = 0;
+            
+            particlesMesh.rotation.set(0, 0, 0);
+            resetSpeeds();
+            
+            for (let i = 5; i >= 1; i--) {
+                const coords = getTextCoordinates(i.toString());
+                updateDebug(`Đang hiển thị số đếm ngược: ${i} (${coords.length} hạt)`);
+                morphToShape(coords);
+                await sleep(1000);
+                if (seqId !== currentSequenceId) return;
+            }
+            
+            // Tự động chuyển tiếp
+            currentMode = 'BIRTHDAY';
+            updateActiveButton('birthday');
+            const bdayCoords = getBirthdayCoordinates();
+            updateDebug(`Đang hiển thị chữ HAPPY BIRTHDAY (${bdayCoords.length} hạt)...`);
+            morphToShape(bdayCoords);
+            
+            await sleep(4500);
+            if (seqId !== currentSequenceId) return;
+
+            currentMode = 'FIREWORKS';
+            updateActiveButton('fireworks');
+            triggerInitialTextBurst();
+            
+            await sleep(7500);
+            if (seqId !== currentSequenceId) return;
+
+            updateActiveButton('cake');
+            triggerCakeStage();
+        }
+
+        function showBirthdayStage() {
+            currentSequenceId++;
+            currentMode = 'BIRTHDAY';
+            giftOpened = true;
+            updateActiveButton('birthday');
+            
+            clickZone.style.pointerEvents = 'none';
+            clickZone.style.display = 'none';
+            hintEl.classList.add('hidden');
+            
+            if (fireworksInterval) clearInterval(fireworksInterval);
+            for (let i = 0; i < PARTICLE_COUNT; i++) pState[i] = 0;
+            
+            particlesMesh.rotation.set(0, 0, 0);
+            
+            const bdayCoords = getBirthdayCoordinates();
+            updateDebug(`Đang hiển thị chữ HAPPY BIRTHDAY (${bdayCoords.length} hạt)...`);
+            morphToShape(bdayCoords);
+            resetSpeeds();
+        }
+
+        function showFireworksStage() {
+            currentSequenceId++;
+            currentMode = 'FIREWORKS';
+            giftOpened = true;
+            updateActiveButton('fireworks');
+            
+            clickZone.style.pointerEvents = 'none';
+            clickZone.style.display = 'none';
+            hintEl.classList.add('hidden');
+            
+            if (fireworksInterval) clearInterval(fireworksInterval);
+            for (let i = 0; i < PARTICLE_COUNT; i++) pState[i] = 0;
+            
+            particlesMesh.rotation.set(0, 0, 0);
+            
+            triggerInitialTextBurst();
+        }
+
+        function showCakeStage() {
+            currentSequenceId++;
+            giftOpened = true;
+            updateActiveButton('cake');
+            
+            clickZone.style.pointerEvents = 'none';
+            clickZone.style.display = 'none';
+            hintEl.classList.add('hidden');
+            
+            triggerCakeStage();
+        }
+
+        async function startFullSequence() {
+            if (giftOpened) return;
+            giftOpened = true;
+
+            currentSequenceId++;
+            const seqId = currentSequenceId;
+
+            // Ẩn vùng click và chữ gợi ý
+            clickZone.style.pointerEvents = 'none';
+            clickZone.style.display = 'none';
+            hintEl.classList.add('hidden');
+
+            updateDebug("Đang nổ tung hộp quà...");
+            explodeParticles();
+            
+            await sleep(1800);
+            if (seqId !== currentSequenceId) return;
+
+            // === GIAI ĐOẠN 2: ĐẾM NGƯỢC ===
+            currentMode = 'COUNTDOWN';
+            updateActiveButton('countdown');
+            resetSpeeds();
+
+            for (let i = 5; i >= 1; i--) {
+                const coords = getTextCoordinates(i.toString());
+                updateDebug(`Đang hiển thị số đếm ngược: ${i} (${coords.length} hạt)`);
+                morphToShape(coords);
+                await sleep(1000);
+                if (seqId !== currentSequenceId) return;
+            }
+
+            updateDebug("Đếm ngược kết thúc tại số 1 lấp lánh!");
+            
+            // === GIAI ĐOẠN 3: HAPPY BIRTHDAY ===
+            currentMode = 'BIRTHDAY';
+            updateActiveButton('birthday');
+            const bdayCoords = getBirthdayCoordinates();
+            updateDebug(`Đang hiển thị chữ HAPPY BIRTHDAY (${bdayCoords.length} hạt)...`);
+            morphToShape(bdayCoords);
+            
+            await sleep(4500);
+            if (seqId !== currentSequenceId) return;
+
+            // === GIAI ĐOẠN 4: PHÁO HOA RỰC RỠ ===
+            currentMode = 'FIREWORKS';
+            updateActiveButton('fireworks');
+            triggerInitialTextBurst();
+            
+            await sleep(7500); // bắn pháo hoa hoành tráng trong 7.5s
+            if (seqId !== currentSequenceId) return;
+
+            // === GIAI ĐOẠN 5: BÁNH SINH NHẬT 3D ===
+            updateActiveButton('cake');
+            triggerCakeStage();
+        }
+
+        clickZone.addEventListener('click', async (event) => {
+            console.log("Click nhận được:", event);
+            updateDebug(`Đã nhận click. Tọa độ: (${event.clientX}, ${event.clientY}), isTrusted: ${event.isTrusted}`);
+            
+            // Chống click ảo/tự động kích hoạt khi vừa load trang từ các script/trình duyệt
+            if (!event.isTrusted) {
+                updateDebug("Bỏ qua click ảo (isTrusted = false)");
+                return;
+            }
+            if (event.clientX === 0 && event.clientY === 0) {
+                updateDebug("Bỏ qua click ảo (tọa độ 0,0)");
+                return;
+            }
+            if (Date.now() - loadTime < 1500) {
+                updateDebug("Bỏ qua click do chưa hết thời gian chờ 1.5s");
+                return;
+            }
+            
+            startFullSequence();
+        });
+
+        // Gắn sự kiện click cho bảng điều khiển
+        document.getElementById('btn-gift').addEventListener('click', () => showGiftStage());
+        document.getElementById('btn-countdown').addEventListener('click', () => showCountdownStage());
+        document.getElementById('btn-birthday').addEventListener('click', () => showBirthdayStage());
+        document.getElementById('btn-fireworks').addEventListener('click', () => showFireworksStage());
+        document.getElementById('btn-cake').addEventListener('click', () => showCakeStage());
+    </script>
+</body>
+</html>
