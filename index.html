@@ -2,8 +2,12 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hiệu Ứng Đếm Ngược Hạt 3D</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="screen-orientation" content="landscape">
+    <title>🎂 Sinh Nhật Hạt 3D</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;700;900&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -116,6 +120,61 @@
             border-color: transparent;
             color: #ffffff;
             box-shadow: 0 4px 15px rgba(255, 94, 151, 0.45);
+        }
+
+        /* --- RESPONSIVE ĐIỆN THOẠI --- */
+        @media (max-width: 600px) {
+            .control-panel {
+                bottom: 12px;
+                gap: 6px;
+                padding: 6px 10px;
+                border-radius: 20px;
+                max-width: 95vw;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .control-btn {
+                padding: 6px 10px;
+                font-size: 9.5px;
+                letter-spacing: 0.8px;
+            }
+            .click-hint {
+                font-size: 11px;
+                letter-spacing: 2px;
+                bottom: 18%;
+            }
+        }
+
+        /* Màn hình ngang (landscape) trên điện thoại */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .control-panel {
+                bottom: 8px;
+                gap: 6px;
+                padding: 5px 10px;
+            }
+            .control-btn {
+                padding: 4px 10px;
+                font-size: 9px;
+            }
+            .click-hint {
+                bottom: 12%;
+                font-size: 11px;
+            }
+            #gift-click-zone {
+                width: 180px;
+                height: 180px;
+                top: 50%;
+            }
+        }
+
+        /* Tắt chọn văn bản & cuộn trang khi chạm vào canvas */
+        canvas {
+            touch-action: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            touch-action: none;
+            -webkit-tap-highlight-color: transparent;
         }
     </style>
 </head>
@@ -924,11 +983,17 @@
         }
         animate();
 
-        // Responsive
-        window.addEventListener('resize', () => {
+        // Responsive — tự động điều chỉnh khi xoay màn hình điện thoại
+        function onResize() {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        }
+        window.addEventListener('resize', onResize);
+        window.addEventListener('orientationchange', () => {
+            // Đợi màn hình xoay xong (180ms) rồi mới cập nhật kích thước
+            setTimeout(onResize, 200);
         });
 
         // ═══════════════════════════════════════════════════
