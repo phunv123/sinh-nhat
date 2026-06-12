@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="screen-orientation" content="landscape">
     <title>🎂 Sinh Nhật Hạt 3D</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Montserrat:wght@300;700;900&family=Patrick+Hand&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -41,123 +41,53 @@
         /* --- GỢI Ý TƯƠNG TÁC --- */
         .click-hint {
             position: fixed;
-            bottom: 22%;
+            bottom: 16%;
             left: 50%;
             transform: translateX(-50%);
             z-index: 10;
-            font-size: 14px;
-            font-weight: 300;
-            color: rgba(255, 180, 210, 0.6);
-            letter-spacing: 4px;
+            font-size: 16px;
+            font-weight: 700;
+            color: rgba(255, 238, 248, 0.96);
+            letter-spacing: 3px;
             text-transform: uppercase;
             pointer-events: none;
-            text-shadow: 0 0 18px rgba(255, 105, 180, 0.5);
-            animation: pulseHint 2.5s infinite alternate ease-in-out;
+            text-shadow:
+                0 0 8px rgba(255, 255, 255, 0.9),
+                0 0 18px rgba(255, 105, 180, 0.85),
+                0 0 34px rgba(255, 45, 145, 0.55);
+            animation: pulseHint 2.2s infinite alternate ease-in-out;
             transition: all 0.8s ease;
             white-space: nowrap;
         }
 
         .click-hint.hidden {
             opacity: 0;
+            visibility: hidden;
             transform: translateX(-50%) translateY(20px);
-            filter: blur(12px);
+            filter: none;
+            text-shadow: none;
+            animation: none;
+            transition: opacity 0.25s ease, visibility 0s linear 0.25s;
         }
 
         @keyframes pulseHint {
-            0% { opacity: 0.35; }
+            0% { opacity: 0.72; }
             100% { opacity: 0.95; }
-        }
-
-        /* --- BẢNG ĐIỀU KHIỂN DEBUG SANG TRỌNG --- */
-        .control-panel {
-            position: fixed;
-            bottom: 25px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 100;
-            display: flex;
-            gap: 12px;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            padding: 8px 18px;
-            border-radius: 30px;
-            box-shadow: 0 8px 32px 0 rgba(255, 105, 180, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.1);
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .control-btn {
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            color: rgba(255, 255, 255, 0.7);
-            padding: 8px 18px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            font-family: 'Montserrat', sans-serif;
-            white-space: nowrap;
-        }
-
-        .control-btn:hover {
-            background: rgba(255, 105, 180, 0.2);
-            border-color: rgba(255, 105, 180, 0.4);
-            color: #ffffff;
-            box-shadow: 0 0 15px rgba(255, 105, 180, 0.35);
-            transform: translateY(-2px);
-        }
-
-        .control-btn:active {
-            transform: translateY(0);
-        }
-
-        .control-btn.active {
-            background: linear-gradient(135deg, #ff5e97, #ff8cb6);
-            border-color: transparent;
-            color: #ffffff;
-            box-shadow: 0 4px 15px rgba(255, 94, 151, 0.45);
         }
 
         /* --- RESPONSIVE ĐIỆN THOẠI --- */
         @media (max-width: 600px) {
-            .control-panel {
-                bottom: 12px;
-                gap: 6px;
-                padding: 6px 10px;
-                border-radius: 20px;
-                max-width: 95vw;
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-            .control-btn {
-                padding: 6px 10px;
-                font-size: 9.5px;
-                letter-spacing: 0.8px;
-            }
             .click-hint {
-                font-size: 11px;
-                letter-spacing: 2px;
-                bottom: 18%;
+                font-size: 12px;
+                letter-spacing: 1.6px;
+                bottom: 14%;
             }
         }
 
         /* Màn hình ngang (landscape) trên điện thoại */
         @media (max-height: 500px) and (orientation: landscape) {
-            .control-panel {
-                bottom: 8px;
-                gap: 6px;
-                padding: 5px 10px;
-            }
-            .control-btn {
-                padding: 4px 10px;
-                font-size: 9px;
-            }
             .click-hint {
-                bottom: 12%;
+                bottom: 8%;
                 font-size: 11px;
             }
             #gift-click-zone {
@@ -207,6 +137,281 @@
             transform: scale(1.1);
         }
 
+        /* --- LÁ THƯ CHÚC MỪNG --- */
+        #wish-card {
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            z-index: 20;
+            width: min(560px, 82vw);
+            max-height: min(76vh, 620px);
+            padding: clamp(26px, 4.2vw, 48px) clamp(28px, 5vw, 58px);
+            border: 0;
+            border-radius: 2px;
+            background:
+                linear-gradient(92deg, rgba(255, 255, 255, 0.32) 0 1px, transparent 1px 100%),
+                radial-gradient(circle at 20% 15%, rgba(255, 255, 255, 0.88), transparent 34%),
+                radial-gradient(circle at 82% 76%, rgba(255, 190, 218, 0.22), transparent 44%),
+                linear-gradient(145deg, rgba(255, 253, 248, 0.96), rgba(255, 244, 236, 0.9));
+            background-size: 18px 100%, auto, auto, auto;
+            box-shadow:
+                0 0 42px rgba(255, 130, 190, 0.17),
+                0 26px 70px rgba(0, 0, 0, 0.5),
+                inset 0 0 42px rgba(255, 255, 255, 0.72);
+            color: #4d2631;
+            text-align: left;
+            transform: translate(-50%, -50%) scale(0.78) rotate(-5deg) rotateX(18deg);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            overflow: hidden;
+            clip-path: polygon(1.2% 0.8%, 98.4% 0%, 99.2% 98.2%, 2% 99.1%);
+            transition: opacity 0.9s ease, visibility 0s linear 0.9s;
+        }
+
+        #wish-card.visible {
+            opacity: 1;
+            visibility: visible;
+            animation: paperReveal 1.25s cubic-bezier(0.18, 0.9, 0.24, 1) forwards, paperFloat 5.5s ease-in-out 1.25s infinite;
+            transition-delay: 0s;
+        }
+
+        #wish-card.folding {
+            opacity: 0;
+            visibility: visible;
+            animation: paperFoldAway 1.15s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+
+        #wish-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                repeating-linear-gradient(0deg, transparent 0 30px, rgba(179, 91, 117, 0.12) 31px 32px),
+                radial-gradient(circle at 14% 18%, rgba(185, 110, 85, 0.08), transparent 26%),
+                radial-gradient(circle at 74% 62%, rgba(120, 70, 48, 0.06), transparent 30%);
+            mix-blend-mode: multiply;
+            opacity: 0.58;
+            pointer-events: none;
+        }
+
+        #wish-card::after {
+            content: "";
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 74px;
+            height: 74px;
+            background: linear-gradient(225deg, rgba(255, 214, 226, 0.75), rgba(255, 255, 255, 0.2) 54%, transparent 55%);
+            box-shadow: -10px 12px 22px rgba(134, 69, 87, 0.08);
+            pointer-events: none;
+        }
+
+        #wish-card h1 {
+            position: relative;
+            margin-bottom: 16px;
+            font-family: 'Dancing Script', cursive;
+            font-size: clamp(36px, 6vw, 62px);
+            line-height: 1.05;
+            color: #9a2352;
+            text-align: center;
+            text-shadow: 0 2px 12px rgba(255, 140, 190, 0.2);
+            letter-spacing: 0;
+        }
+
+        #wish-card p {
+            position: relative;
+            margin: 9px auto 0;
+            max-width: 470px;
+            font-family: 'Patrick Hand', cursive;
+            font-size: clamp(18px, 2.6vw, 25px);
+            line-height: 1.42;
+            font-weight: 400;
+            color: rgba(70, 38, 46, 0.9);
+            opacity: 0;
+            transform: translateY(14px);
+        }
+
+        #wish-card.visible p {
+            animation: revealWishLine 0.7s ease forwards;
+        }
+
+        #wish-card.visible p:nth-of-type(1) { animation-delay: 0.55s; }
+        #wish-card.visible p:nth-of-type(2) { animation-delay: 1.15s; }
+        #wish-card.visible p:nth-of-type(3) { animation-delay: 1.75s; }
+        #wish-card.visible p:nth-of-type(4) { animation-delay: 2.35s; }
+
+        .wish-signature {
+            display: block;
+            margin-top: 16px;
+            font-family: 'Dancing Script', cursive;
+            font-size: clamp(24px, 4vw, 36px);
+            color: #b51662;
+            text-align: right;
+        }
+
+        #gesture-panel {
+            position: fixed;
+            left: 50%;
+            bottom: 22px;
+            z-index: 60;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            border: 1px solid rgba(255, 210, 232, 0.22);
+            border-radius: 999px;
+            background: rgba(0, 0, 0, 0.38);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            color: rgba(255, 238, 248, 0.92);
+            box-shadow: 0 0 24px rgba(255, 105, 180, 0.18);
+            transform: translateX(-50%) translateY(16px);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.35s ease, transform 0.35s ease, visibility 0s linear 0.35s;
+        }
+
+        #gesture-panel.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+            transition-delay: 0s;
+        }
+
+        #gesture-toggle {
+            display: none;
+            border: 0;
+            border-radius: 999px;
+            padding: 9px 14px;
+            background: linear-gradient(135deg, rgba(255, 91, 157, 0.95), rgba(255, 177, 216, 0.92));
+            color: #fff;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+            box-shadow: 0 8px 24px rgba(255, 78, 151, 0.26);
+        }
+
+        #gesture-status {
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        #camera-preview {
+            position: fixed;
+            right: 18px;
+            bottom: 18px;
+            z-index: 55;
+            width: 1px;
+            height: 1px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 210, 232, 0.24);
+            object-fit: cover;
+            transform: scaleX(-1);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            box-shadow: none;
+            transition: opacity 0.35s ease, visibility 0s linear 0.35s;
+        }
+
+        #camera-preview.visible {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        #cake-title {
+            position: fixed;
+            top: 12%;
+            left: 50%;
+            z-index: 18;
+            color: rgba(198, 255, 244, 0.96);
+            font-size: clamp(18px, 3.2vw, 34px);
+            font-weight: 900;
+            letter-spacing: 0;
+            text-align: center;
+            text-shadow:
+                0 0 10px rgba(154, 255, 241, 0.95),
+                0 0 28px rgba(74, 225, 255, 0.55),
+                0 0 44px rgba(134, 95, 255, 0.35);
+            transform: translateX(-50%) translateY(-12px);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.7s ease, transform 0.7s ease, visibility 0s linear 0.7s;
+            white-space: nowrap;
+        }
+
+        #cake-title.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+            transition-delay: 0s;
+        }
+
+        #cake-title span {
+            display: block;
+            margin-top: 4px;
+            font-size: 0.48em;
+            color: rgba(255, 235, 250, 0.86);
+            text-shadow: 0 0 16px rgba(255, 128, 210, 0.42);
+        }
+
+        #gesture-panel.cake-mode {
+            border-color: rgba(137, 245, 255, 0.24);
+            box-shadow: 0 0 26px rgba(70, 230, 255, 0.16);
+        }
+
+        @keyframes revealWishLine {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes paperReveal {
+            0% {
+                transform: translate(-50%, -42%) scale(0.55) rotate(-13deg) rotateX(42deg);
+                filter: blur(10px);
+            }
+            58% {
+                transform: translate(-50%, -51%) scale(1.04) rotate(1.8deg) rotateX(0deg);
+                filter: blur(0);
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1) rotate(-1.2deg) rotateX(0deg);
+                filter: blur(0);
+            }
+        }
+
+        @keyframes paperFloat {
+            0%, 100% { transform: translate(-50%, -50%) rotate(-1.2deg); }
+            50% { transform: translate(-50%, calc(-50% - 7px)) rotate(0.8deg); }
+        }
+
+        @keyframes paperFoldAway {
+            0% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1) rotate(-1.2deg) rotateX(0deg);
+                clip-path: polygon(1.2% 0.8%, 98.4% 0%, 99.2% 98.2%, 2% 99.1%);
+                filter: blur(0);
+            }
+            48% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(0.86) rotate(2deg) rotateX(62deg);
+                clip-path: polygon(8% 12%, 92% 12%, 78% 52%, 22% 52%);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -44%) scale(0.18) rotate(18deg) rotateX(78deg);
+                clip-path: polygon(46% 42%, 54% 42%, 54% 58%, 46% 58%);
+                filter: blur(8px);
+            }
+        }
+
         /* --- THÔNG BÁO XOAY DỌC SANG NGANG (iOS) --- */
         #rotate-overlay {
             display: none;
@@ -239,6 +444,31 @@
             40% { transform: rotate(-90deg); }
             60% { transform: rotate(-90deg); }
         }
+
+        @media (max-height: 500px) and (orientation: landscape) {
+            #wish-card {
+                width: min(560px, 78vw);
+                max-height: 82vh;
+                padding: 18px 32px;
+            }
+            #wish-card h1 {
+                font-size: 34px;
+                margin-bottom: 8px;
+            }
+            #wish-card p {
+                font-size: 17px;
+                line-height: 1.25;
+                margin-top: 4px;
+            }
+            #camera-preview {
+                width: 88px;
+                height: 66px;
+            }
+            #gesture-panel {
+                bottom: 10px;
+                max-width: 94vw;
+            }
+        }
     </style>
 </head>
 <body>
@@ -247,13 +477,20 @@
     <div id="gift-click-zone"></div>
     <div class="click-hint" id="click-hint">✨ Chạm để mở quà ✨</div>
 
-    <div class="control-panel" id="control-panel">
-        <button class="control-btn active" id="btn-gift">Hộp quà</button>
-        <button class="control-btn" id="btn-countdown">Đếm ngược</button>
-        <button class="control-btn" id="btn-birthday">Birthday</button>
-        <button class="control-btn" id="btn-fireworks">Pháo hoa</button>
-        <button class="control-btn" id="btn-cake">Bánh kem</button>
+    <section id="wish-card" aria-hidden="true">
+        <h1>Giang Lưu thân mến,</h1>
+        <p>Chúc mừng sinh nhật tuổi mới của em.</p>
+        <p>Mong ngày 03/07 luôn dịu dàng, rực rỡ và đầy những điều khiến em mỉm cười.</p>
+        <p>Chúc em bình an, được yêu thương thật nhiều, và mọi ước mơ đẹp sẽ dần thành hiện thực.</p>
+        <p><span class="wish-signature">Happy birthday.</span></p>
+    </section>
+
+    <div id="gesture-panel" aria-hidden="true">
+        <button id="gesture-toggle" type="button">Bật camera</button>
+        <span id="gesture-status">Cho phép camera để dùng cử chỉ</span>
     </div>
+    <video id="camera-preview" playsinline muted></video>
+    <div id="cake-title" aria-hidden="true">GIANG LƯU <span>03.07.2005</span></div>
 
     <!-- Nút Fullscreen -->
     <button id="fullscreen-btn" title="Toàn màn hình">⛶</button>
@@ -267,6 +504,9 @@
     <div id="debug-overlay" style="display: none; position: fixed; top: 10px; left: 10px; color: #ff80b0; z-index: 100; font-family: monospace; font-size: 14px; background: rgba(0,0,0,0.8); padding: 12px; border: 1px solid #ff5090; border-radius: 8px; pointer-events: none; max-width: 90vw; word-wrap: break-word;">
         [Hộp quà] Đang tải...
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
 
     <script type="importmap">
         {
@@ -370,69 +610,118 @@
         //  3. KHỞI TẠO HỆ THỐNG HẠT HỒNG KIM TUYẾN
         // ═══════════════════════════════════════════════════
         function getGiftBoxCoordinates() {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = 800; canvas.height = 800;
-
-            ctx.fillStyle = '#000';
-            ctx.fillRect(0, 0, 800, 800);
-            ctx.fillStyle = '#fff';
-
-            // Thân hộp quà
-            ctx.fillRect(250, 370, 300, 250);
-
-            // Nắp hộp (rộng hơn thân một chút)
-            ctx.fillRect(230, 315, 340, 60);
-
-            // Ruy băng dọc (xuyên suốt nắp + thân)
-            ctx.fillRect(378, 315, 44, 305);
-
-            // Ruy băng ngang (giữa thân)
-            ctx.fillRect(250, 470, 300, 40);
-
-            // Nơ bên trái
-            ctx.beginPath();
-            ctx.ellipse(372, 295, 52, 32, -0.35, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Nơ bên phải
-            ctx.beginPath();
-            ctx.ellipse(428, 295, 52, 32, 0.35, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Nút thắt nơ
-            ctx.beginPath();
-            ctx.arc(400, 300, 16, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Đuôi ruy-băng trái
-            ctx.beginPath();
-            ctx.moveTo(360, 305);
-            ctx.lineTo(330, 270);
-            ctx.lineTo(345, 305);
-            ctx.fill();
-
-            // Đuôi ruy-băng phải
-            ctx.beginPath();
-            ctx.moveTo(440, 305);
-            ctx.lineTo(470, 270);
-            ctx.lineTo(455, 305);
-            ctx.fill();
-
-            const imageData = ctx.getImageData(0, 0, 800, 800).data;
             const coords = [];
+            const giftScale = 0.66;
+            const giftYOffset = -8;
+            const jitter = (amount) => (Math.random() - 0.5) * amount;
 
-            for (let y = 0; y < 800; y += 3) {
-                for (let x = 0; x < 800; x += 3) {
-                    if (imageData[(y * 800 + x) * 4] > 128) {
-                        coords.push({
-                            x: (x - 400) * 0.35,
-                            y: -(y - 400) * 0.35,
-                            z: (Math.random() - 0.5) * 12
-                        });
+            function addPoint(x, y, z, kind = 'body', weight = 1) {
+                coords.push({
+                    x: (x + jitter(1.8)) * giftScale,
+                    y: (y + jitter(1.8)) * giftScale + giftYOffset,
+                    z: (z + jitter(1.8)) * giftScale,
+                    kind,
+                    weight
+                });
+            }
+
+            function addCuboid(width, height, depth, cx, cy, cz, step, kind) {
+                const x0 = cx - width / 2, x1 = cx + width / 2;
+                const y0 = cy - height / 2, y1 = cy + height / 2;
+                const z0 = cz - depth / 2, z1 = cz + depth / 2;
+
+                for (let x = x0; x <= x1; x += step) {
+                    for (let y = y0; y <= y1; y += step) {
+                        if (Math.random() > 0.12) addPoint(x, y, z1, kind);
+                        if (Math.random() > 0.55) addPoint(x, y, z0, kind);
+                    }
+                }
+                for (let z = z0; z <= z1; z += step) {
+                    for (let y = y0; y <= y1; y += step) {
+                        addPoint(x0, y, z, kind);
+                        addPoint(x1, y, z, kind);
+                    }
+                }
+                for (let x = x0; x <= x1; x += step) {
+                    for (let z = z0; z <= z1; z += step) {
+                        addPoint(x, y1, z, kind);
                     }
                 }
             }
+
+            function addLine(x1, y1, z1, x2, y2, z2, step, kind, repeats = 2) {
+                const dx = x2 - x1, dy = y2 - y1, dz = z2 - z1;
+                const length = Math.sqrt(dx * dx + dy * dy + dz * dz);
+                const count = Math.max(2, Math.floor(length / step));
+                for (let i = 0; i <= count; i++) {
+                    const t = i / count;
+                    for (let r = 0; r < repeats; r++) {
+                        addPoint(x1 + dx * t, y1 + dy * t, z1 + dz * t, kind, 1.5);
+                    }
+                }
+            }
+
+            function addRibbonBand(width, height, z, y, kind) {
+                for (let x = -width / 2; x <= width / 2; x += 3.2) {
+                    for (let yy = y - height / 2; yy <= y + height / 2; yy += 3.2) {
+                        addPoint(x, yy, z, kind, 1.4);
+                    }
+                }
+            }
+
+            function addBowLoop(cx, cy, cz, sx, sy, tilt) {
+                for (let t = 0; t < Math.PI * 2; t += 0.055) {
+                    const x = cx + Math.cos(t) * sx;
+                    const y = cy + Math.sin(t) * sy;
+                    const z = cz + Math.sin(t + tilt) * 7;
+                    for (let r = 0; r < 4; r++) {
+                        addPoint(x + jitter(4.5), y + jitter(4), z + jitter(4), 'bow', 1.6);
+                    }
+                }
+            }
+
+            // Thân và nắp hộp nhỏ hơn, rõ khối hơn, đặt chính giữa màn hình.
+            addCuboid(118, 96, 52, 0, -28, 0, 4.4, 'body');
+            addCuboid(138, 28, 62, 0, 43, 0, 4.0, 'lid');
+
+            // Ruy băng nổi trên mặt trước.
+            addRibbonBand(18, 122, 34, -7, 'ribbon');
+            addRibbonBand(126, 16, 35, -28, 'ribbon');
+            addRibbonBand(146, 12, 39, 43, 'ribbon');
+
+            // Viền sáng giúp hộp nổi trên nền đen.
+            const edges = [
+                [-59, -76, 28, 59, -76, 28], [-59, 20, 28, 59, 20, 28],
+                [-59, -76, 28, -59, 20, 28], [59, -76, 28, 59, 20, 28],
+                [-69, 29, 34, 69, 29, 34], [-69, 57, 34, 69, 57, 34],
+                [-69, 29, 34, -69, 57, 34], [69, 29, 34, 69, 57, 34]
+            ];
+            edges.forEach(edge => addLine(...edge, 2.4, 'edge', 3));
+
+            // Khe sáng giữa nắp và thân hộp.
+            for (let i = 0; i < 950; i++) {
+                const x = (Math.random() - 0.5) * 128;
+                const y = 20 + Math.random() * 12;
+                const z = 36 + Math.random() * 16;
+                addPoint(x, y, z, 'core', 2);
+            }
+
+            // Nơ cong bằng hạt nổi lên trên nắp.
+            addBowLoop(-24, 72, 20, 22, 12, 0.5);
+            addBowLoop(24, 72, 20, 22, 12, -0.5);
+            for (let i = 0; i < 260; i++) {
+                const theta = Math.random() * Math.PI * 2;
+                const radius = Math.random() * 8;
+                addPoint(Math.cos(theta) * radius, 70 + Math.sin(theta) * radius * 0.5, 28 + jitter(7), 'bow', 1.8);
+            }
+
+            // Một ít bụi sáng rất xa, để nền vẫn đen và hộp là tâm điểm.
+            for (let i = 0; i < 900; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const radius = 170 + Math.random() * 260;
+                addPoint(Math.cos(angle) * radius, (Math.random() - 0.5) * 300, Math.sin(angle) * radius, 'ambient', 0.45);
+            }
+
             return coords;
         }
 
@@ -443,8 +732,19 @@
         const targetPositions = new Float32Array(PARTICLE_COUNT * 3);
         const speeds = new Float32Array(PARTICLE_COUNT);
         const colors = new Float32Array(PARTICLE_COUNT * 3);
+        const particleKinds = new Uint8Array(PARTICLE_COUNT); // 0: ambient, 1: gift detail
+        const activeShapeKinds = new Uint8Array(PARTICLE_COUNT);
         const twinklePhase = new Float32Array(PARTICLE_COUNT);
         const twinkleSpeed = new Float32Array(PARTICLE_COUNT);
+
+        function shapeKindId(kind) {
+            if (kind === 'cakeOrbit') return 2;
+            if (kind === 'cakeStar') return 3;
+            if (kind === 'cakeSpark') return 4;
+            if (kind === 'cakeGlow') return 5;
+            if (kind === 'photoGalaxy') return 6;
+            return 1;
+        }
 
         // Lấy tọa độ hộp quà ngay khi khởi động
         const giftCoords = getGiftBoxCoordinates();
@@ -453,15 +753,21 @@
 
         for (let i = 0; i < PARTICLE_COUNT; i++) {
             let x, y, z;
+            let particleKind = 'ambient';
             if (i < giftCoords.length) {
                 x = giftCoords[i].x;
                 y = giftCoords[i].y;
                 z = giftCoords[i].z;
+                particleKind = giftCoords[i].kind || 'body';
+                particleKinds[i] = particleKind === 'ambient' ? 0 : 1;
             } else {
-                // Hạt dư lơ lửng xung quanh tạo nền lấp lánh
-                x = (Math.random() - 0.5) * 350;
-                y = (Math.random() - 0.5) * 350;
-                z = (Math.random() - 0.5) * 350;
+                // Hạt dư đặt xa và tối để nền vẫn đen, hộp quà là tâm điểm.
+                const angle = Math.random() * Math.PI * 2;
+                const radius = 260 + Math.random() * 520;
+                x = Math.cos(angle) * radius;
+                y = (Math.random() - 0.5) * 420;
+                z = Math.sin(angle) * radius;
+                particleKinds[i] = 0;
             }
 
             positions[i * 3]     = x;
@@ -474,33 +780,30 @@
 
             speeds[i] = 0.02 + Math.random() * 0.025; // Tốc độ di chuyển ban đầu mượt mà
 
-            // === Bảng màu hồng ánh kim tuyến ===
-            const roll = Math.random();
-            if (roll < 0.35) {
-                // Hot Pink rực rỡ
+            if (particleKind === 'core') {
+                colors[i * 3]     = 1.9;
+                colors[i * 3 + 1] = 1.1 + Math.random() * 0.25;
+                colors[i * 3 + 2] = 1.25 + Math.random() * 0.25;
+            } else if (particleKind === 'edge') {
+                colors[i * 3]     = 1.45;
+                colors[i * 3 + 1] = 1.0 + Math.random() * 0.2;
+                colors[i * 3 + 2] = 1.05 + Math.random() * 0.15;
+            } else if (particleKind === 'ribbon' || particleKind === 'bow') {
+                colors[i * 3]     = 1.25;
+                colors[i * 3 + 1] = 0.38 + Math.random() * 0.24;
+                colors[i * 3 + 2] = 0.78 + Math.random() * 0.22;
+            } else if (particleKind === 'lid') {
                 colors[i * 3]     = 1.0;
-                colors[i * 3 + 1] = 0.3 + Math.random() * 0.25;
-                colors[i * 3 + 2] = 0.6 + Math.random() * 0.2;
-            } else if (roll < 0.6) {
-                // Rose Gold / Champagne ánh kim
-                colors[i * 3]     = 1.0;
-                colors[i * 3 + 1] = 0.65 + Math.random() * 0.2;
-                colors[i * 3 + 2] = 0.7 + Math.random() * 0.2;
-            } else if (roll < 0.8) {
-                // Trắng lấp lánh (điểm nhấn sáng chói)
-                colors[i * 3]     = 1.0;
-                colors[i * 3 + 1] = 0.88 + Math.random() * 0.12;
-                colors[i * 3 + 2] = 0.92 + Math.random() * 0.08;
-            } else if (roll < 0.92) {
-                // Deep Magenta sâu
-                colors[i * 3]     = 0.85 + Math.random() * 0.15;
-                colors[i * 3 + 1] = 0.05 + Math.random() * 0.15;
-                colors[i * 3 + 2] = 0.45 + Math.random() * 0.25;
+                colors[i * 3 + 1] = 0.46 + Math.random() * 0.2;
+                colors[i * 3 + 2] = 0.74 + Math.random() * 0.18;
+            } else if (particleKind === 'body') {
+                colors[i * 3]     = 0.82 + Math.random() * 0.22;
+                colors[i * 3 + 1] = 0.18 + Math.random() * 0.18;
+                colors[i * 3 + 2] = 0.48 + Math.random() * 0.22;
             } else {
-                // Vàng Gold nhẹ (tạo ánh kim tuyến vàng)
-                colors[i * 3]     = 1.0;
-                colors[i * 3 + 1] = 0.82 + Math.random() * 0.15;
-                colors[i * 3 + 2] = 0.3 + Math.random() * 0.3;
+                colors[i * 3]     = 0.38 + Math.random() * 0.3;
+                colors[i * 3 + 1] = 0.16 + Math.random() * 0.16;
+                colors[i * 3 + 2] = 0.32 + Math.random() * 0.28;
             }
 
             twinklePhase[i] = Math.random() * Math.PI * 2;
@@ -512,7 +815,7 @@
         geometry.setAttribute('color', new THREE.BufferAttribute(colors.slice(), 3));
 
         // --- HỆ THỐNG VẬT LÝ PHÁO HOA ---
-        let currentMode = 'GIFT'; // 'GIFT', 'COUNTDOWN', 'BIRTHDAY', 'FIREWORKS', 'CAKE'
+        let currentMode = 'GIFT'; // 'GIFT', 'COUNTDOWN', 'BIRTHDAY', 'FIREWORKS', 'WISH_CARD', 'CAKE', 'PHOTO_GALAXY'
         const vx = new Float32Array(PARTICLE_COUNT);
         const vy = new Float32Array(PARTICLE_COUNT);
         const vz = new Float32Array(PARTICLE_COUNT);
@@ -521,6 +824,9 @@
         const pState = new Uint8Array(PARTICLE_COUNT); // 0: ambient star, 1: rising shell, 2: explosion spark
         const baseColors = colors.slice(); // Bản sao màu sắc nền để sử dụng cho pháo hoa
         let cakeLength = 0; // Số lượng hạt trong hình bánh sinh nhật
+        let wishCardParticleCount = 0;
+        let focusedCardIndex = -1;
+        let lastPhotoFocusTime = 0;
 
         const sparkleTexture = createSparkleTexture();
 
@@ -536,6 +842,110 @@
 
         const particlesMesh = new THREE.Points(geometry, material);
         scene.add(particlesMesh);
+
+        function createGiftGlowTexture() {
+            const size = 256;
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            const c = size / 2;
+            const glow = ctx.createRadialGradient(c, c, 0, c, c, c);
+            glow.addColorStop(0, 'rgba(255, 235, 248, 0.95)');
+            glow.addColorStop(0.16, 'rgba(255, 120, 190, 0.5)');
+            glow.addColorStop(0.42, 'rgba(255, 45, 145, 0.18)');
+            glow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            ctx.fillStyle = glow;
+            ctx.fillRect(0, 0, size, size);
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        const giftGlow = new THREE.Sprite(new THREE.SpriteMaterial({
+            map: createGiftGlowTexture(),
+            color: 0xff7ab8,
+            transparent: true,
+            opacity: 0.32,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+        }));
+        giftGlow.position.set(0, -12, -22);
+        giftGlow.scale.set(175, 145, 1);
+        scene.add(giftGlow);
+
+        function createMemoryTexture(index) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 360;
+            canvas.height = 520;
+            const ctx = canvas.getContext('2d');
+            const palettes = [
+                ['#ff8fb7', '#ffe2ef', '#6a1235'],
+                ['#7ce8ff', '#e8fbff', '#083d56'],
+                ['#b997ff', '#f3eaff', '#32135f'],
+                ['#fff06a', '#fff9c9', '#665600'],
+                ['#ffb36d', '#fff0df', '#6a3100'],
+                ['#81ffbd', '#e9fff3', '#06492b']
+            ];
+            const p = palettes[index % palettes.length];
+            const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            grad.addColorStop(0, p[0]);
+            grad.addColorStop(1, p[1]);
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = 'rgba(255,255,255,0.72)';
+            ctx.fillRect(22, 22, canvas.width - 44, canvas.height - 44);
+
+            const inner = ctx.createLinearGradient(36, 36, canvas.width - 36, canvas.height - 36);
+            inner.addColorStop(0, p[0]);
+            inner.addColorStop(0.5, p[1]);
+            inner.addColorStop(1, '#ffffff');
+            ctx.fillStyle = inner;
+            ctx.fillRect(38, 40, canvas.width - 76, canvas.height - 130);
+
+            ctx.globalCompositeOperation = 'screen';
+            for (let i = 0; i < 90; i++) {
+                ctx.fillStyle = `rgba(255,255,255,${0.08 + Math.random() * 0.32})`;
+                ctx.beginPath();
+                ctx.arc(Math.random() * canvas.width, Math.random() * canvas.height, 1 + Math.random() * 3.5, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.globalCompositeOperation = 'source-over';
+
+            ctx.fillStyle = p[2];
+            ctx.font = '700 30px Montserrat, Arial, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(`Kỷ niệm ${String(index + 1).padStart(2, '0')}`, canvas.width / 2, canvas.height - 58);
+            ctx.font = '600 42px Dancing Script, cursive';
+            ctx.fillText('Giang Lưu', canvas.width / 2, canvas.height - 102);
+
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.colorSpace = THREE.SRGBColorSpace;
+            return texture;
+        }
+
+        const photoGroup = new THREE.Group();
+        const memoryCards = [];
+        const cardGeometry = new THREE.PlaneGeometry(32, 46);
+        for (let i = 0; i < 9; i++) {
+            const material = new THREE.MeshBasicMaterial({
+                map: createMemoryTexture(i),
+                transparent: true,
+                opacity: 0,
+                side: THREE.DoubleSide,
+                depthWrite: false
+            });
+            const card = new THREE.Mesh(cardGeometry, material);
+            card.userData = {
+                orbit: 72 + (i % 3) * 24,
+                height: -34 + (i % 5) * 18,
+                speed: 0.12 + i * 0.014,
+                phase: (i / 9) * Math.PI * 2
+            };
+            photoGroup.add(card);
+            memoryCards.push(card);
+        }
+        photoGroup.visible = false;
+        scene.add(photoGroup);
         updateDebug("Đang hiển thị hộp quà. Hãy nhấp vào hộp quà để mở.");
 
 
@@ -586,11 +996,21 @@
                     targetPositions[i * 3]     = coords[i].x;
                     targetPositions[i * 3 + 1] = coords[i].y;
                     targetPositions[i * 3 + 2] = coords[i].z;
+                    activeShapeKinds[i] = shapeKindId(coords[i].kind);
                 } else {
+                    activeShapeKinds[i] = 0;
                     // Hạt dư bay lơ lửng gần để tạo nền sao lấp lánh
-                    targetPositions[i * 3]     = (Math.random() - 0.5) * 350;
-                    targetPositions[i * 3 + 1] = (Math.random() - 0.5) * 350;
-                    targetPositions[i * 3 + 2] = (Math.random() - 0.5) * 350;
+                    if (currentMode === 'GIFT') {
+                        const angle = Math.random() * Math.PI * 2;
+                        const radius = 260 + Math.random() * 520;
+                        targetPositions[i * 3]     = Math.cos(angle) * radius;
+                        targetPositions[i * 3 + 1] = (Math.random() - 0.5) * 420;
+                        targetPositions[i * 3 + 2] = Math.sin(angle) * radius;
+                    } else {
+                        targetPositions[i * 3]     = (Math.random() - 0.5) * 350;
+                        targetPositions[i * 3 + 1] = (Math.random() - 0.5) * 350;
+                        targetPositions[i * 3 + 2] = (Math.random() - 0.5) * 350;
+                    }
                 }
             }
         }
@@ -617,8 +1037,7 @@
             }
         }
 
-        // --- THÊM: HÀM QUÉT CHỮ HAPPY BIRTHDAY XẾP CHỒNG ---
-        function getBirthdayCoordinates() {
+        function getStackedTextCoordinates(lines) {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             canvas.width = 1000; canvas.height = 1000;
@@ -627,11 +1046,12 @@
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             ctx.fillStyle = '#fff';
-            ctx.font = '900 135px Montserrat, Arial, sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText("HAPPY", canvas.width / 2, canvas.height / 2 - 90);
-            ctx.fillText("BIRTHDAY", canvas.width / 2, canvas.height / 2 + 90);
+            lines.forEach(line => {
+                ctx.font = line.font;
+                ctx.fillText(line.text, canvas.width / 2, canvas.height / 2 + line.y);
+            });
 
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
             const coords = [];
@@ -650,34 +1070,103 @@
             return coords;
         }
 
+        // --- THÊM: HÀM QUÉT CHỮ HAPPY BIRTHDAY XẾP CHỒNG ---
+        function getBirthdayCoordinates() {
+            return getStackedTextCoordinates([
+                { text: "HAPPY", font: '900 135px Montserrat, Arial, sans-serif', y: -90 },
+                { text: "BIRTHDAY", font: '900 135px Montserrat, Arial, sans-serif', y: 90 }
+            ]);
+        }
+
+        // --- THÊM: HÀM QUÉT TÊN VÀ NGÀY SINH XẾP CHỒNG ---
+        function getNameBirthdateCoordinates() {
+            return getStackedTextCoordinates([
+                { text: "GIANG LƯU", font: '900 150px Montserrat, Arial, sans-serif', y: -80 },
+                { text: "03/07/2005", font: '900 112px Montserrat, Arial, sans-serif', y: 95 }
+            ]);
+        }
+
         // --- THÊM: HỆ THỐNG VẬT LÝ & KÍCH HOẠT PHÁO HOA ---
+        async function shatterCurrentTextIntoSparkles() {
+            currentMode = 'FIREWORKS';
+            updateDebug("Chữ GIANG LƯU đang vỡ thành bụi sáng...");
+
+            const posArr = geometry.attributes.position.array;
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                const i3 = i * 3;
+                const px = posArr[i3];
+                const py = posArr[i3 + 1];
+                const pz = posArr[i3 + 2];
+                const dist = Math.sqrt(px * px + py * py + pz * pz) || 1;
+                const burst = 1.25 + Math.random() * 4.2;
+
+                pState[i] = 2;
+                vx[i] = (px / dist) * burst + (Math.random() - 0.5) * 1.4;
+                vy[i] = (py / dist) * burst + 0.35 + Math.random() * 1.9;
+                vz[i] = (pz / dist) * burst + (Math.random() - 0.5) * 1.4;
+                life[i] = 34 + Math.floor(Math.random() * 24);
+                maxLife[i] = life[i];
+
+                const roll = Math.random();
+                if (roll < 0.38) {
+                    baseColors[i3] = 1.0;
+                    baseColors[i3 + 1] = 0.42 + Math.random() * 0.28;
+                    baseColors[i3 + 2] = 0.86 + Math.random() * 0.16;
+                } else if (roll < 0.72) {
+                    baseColors[i3] = 0.65 + Math.random() * 0.22;
+                    baseColors[i3 + 1] = 1.0;
+                    baseColors[i3 + 2] = 1.0;
+                } else {
+                    baseColors[i3] = 1.0;
+                    baseColors[i3 + 1] = 0.92 + Math.random() * 0.08;
+                    baseColors[i3 + 2] = 0.78 + Math.random() * 0.18;
+                }
+            }
+
+            await sleep(1150);
+
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                const i3 = i * 3;
+                pState[i] = 0;
+                life[i] = 0;
+                maxLife[i] = 1;
+                vx[i] = 0;
+                vy[i] = 0;
+                vz[i] = 0;
+
+                const angle = Math.random() * Math.PI * 2;
+                const radius = 420 + Math.random() * 420;
+                posArr[i3] = Math.cos(angle) * radius;
+                posArr[i3 + 1] = -280 + Math.random() * 80;
+                posArr[i3 + 2] = Math.sin(angle) * radius;
+                targetPositions[i3] = posArr[i3];
+                targetPositions[i3 + 1] = posArr[i3 + 1];
+                targetPositions[i3 + 2] = posArr[i3 + 2];
+            }
+        }
+
         function triggerInitialTextBurst() {
             currentMode = 'FIREWORKS';
             
             const posArr = geometry.attributes.position.array;
             for (let i = 0; i < PARTICLE_COUNT; i++) {
-                pState[i] = 2; // đặt thành hạt nổ
-                
                 const i3 = i * 3;
-                const px = posArr[i3];
-                const py = posArr[i3 + 1];
-                const pz = posArr[i3 + 2];
-                
-                const dist = Math.sqrt(px * px + py * py + pz * pz) || 1;
-                const speed = 1.8 + Math.random() * 5.5;
-                
-                // Nổ đẩy ra ngoài từ tâm chữ
-                vx[i] = (px / dist) * speed + (Math.random() - 0.5) * 2;
-                vy[i] = (py / dist) * speed + (Math.random() - 0.5) * 2;
-                vz[i] = (pz / dist) * speed + (Math.random() - 0.5) * 2;
-                
-                life[i] = 65 + Math.floor(Math.random() * 45);
-                maxLife[i] = life[i];
-                
-                // Lưu lại màu hiện tại của chữ để làm màu nền nổ
-                baseColors[i3] = colors[i3];
-                baseColors[i3 + 1] = colors[i3 + 1];
-                baseColors[i3 + 2] = colors[i3 + 2];
+                pState[i] = 0;
+                life[i] = 0;
+                maxLife[i] = 1;
+                vx[i] = 0;
+                vy[i] = 0;
+                vz[i] = 0;
+
+                // Đẩy hạt chữ cũ ra xa và tắt màu để cảnh pháo hoa sạch, không còn chữ phía sau.
+                const angle = Math.random() * Math.PI * 2;
+                const radius = 420 + Math.random() * 420;
+                posArr[i3] = Math.cos(angle) * radius;
+                posArr[i3 + 1] = -280 + Math.random() * 80;
+                posArr[i3 + 2] = Math.sin(angle) * radius;
+                targetPositions[i3] = posArr[i3];
+                targetPositions[i3 + 1] = posArr[i3 + 1];
+                targetPositions[i3 + 2] = posArr[i3 + 2];
             }
             
             updateDebug("Đang trình diễn pháo hoa chúc mừng!");
@@ -699,6 +1188,31 @@
                     setTimeout(launchFirework, 280); // 50% bắn thêm quả kép/ba
                 }
             }, 800);
+        }
+
+        async function playFireworkFinale() {
+            updateDebug("Finale pháo hoa rực rỡ trước khi mở lá thư!");
+
+            for (let wave = 0; wave < 5; wave++) {
+                for (let i = 0; i < 4; i++) {
+                    setTimeout(() => {
+                        if (currentMode !== 'FIREWORKS') return;
+                        const x = -150 + Math.random() * 300;
+                        const y = 20 + Math.random() * 170;
+                        const z = -40 + Math.random() * 80;
+                        const palette = [
+                            [1.0, 0.35, 0.78],
+                            [1.0, 0.82, 0.28],
+                            [1.0, 0.95, 0.92],
+                            [0.85, 0.32, 1.0],
+                            [0.35, 0.9, 1.0]
+                        ][Math.floor(Math.random() * 5)];
+                        explodeAt(x, y, z, palette[0], palette[1], palette[2]);
+                    }, i * 110);
+                }
+                launchFirework();
+                await sleep(360);
+            }
         }
 
         function launchFirework() {
@@ -826,64 +1340,101 @@
             }
         }
 
-        // --- THÊM: HÀM DỰNG HÌNH BÁNH SINH NHẬT 3D ---
+        // --- HÀM DỰNG BÁNH SINH NHẬT DẠNG CÂY SAO PHÁT SÁNG ---
         function getCakeCoordinates() {
             const coords = [];
+            const jitter = (amount) => (Math.random() - 0.5) * amount;
 
-            // Hàm vẽ một tầng bánh hình trụ tròn
-            function addCylinder(radius, height, yOffset, density) {
-                const circumference = 2 * Math.PI * radius;
-                const stepsTheta = Math.floor(circumference * density);
-                const stepsY = Math.floor(height * density);
+            function addPoint(x, y, z, kind = 'cakeGlow') {
+                coords.push({
+                    x: x + jitter(1.2),
+                    y: y + jitter(1.2),
+                    z: z + jitter(1.2),
+                    kind
+                });
+            }
 
-                // Vẽ mặt xung quanh
-                for (let j = 0; j < stepsY; j++) {
-                    const y = yOffset + (j / stepsY) * height;
-                    for (let i = 0; i < stepsTheta; i++) {
-                        const theta = (i / stepsTheta) * Math.PI * 2;
-                        coords.push({
-                            x: Math.cos(theta) * radius,
-                            y: y,
-                            z: Math.sin(theta) * radius
-                        });
-                    }
+            function addConeTier(y0, y1, r0, r1, count) {
+                for (let i = 0; i < count; i++) {
+                    const t = Math.random();
+                    const y = y0 + (y1 - y0) * t;
+                    const radius = r0 + (r1 - r0) * t;
+                    const rr = Math.sqrt(Math.random()) * radius;
+                    const theta = Math.random() * Math.PI * 2;
+                    const kind = Math.random() > 0.72 ? 'cakeSpark' : 'cakeGlow';
+                    addPoint(Math.cos(theta) * rr, y, Math.sin(theta) * rr * 0.72, kind);
                 }
 
-                // Vẽ mặt nắp trên phẳng
-                const radialSteps = Math.floor(radius * density);
-                for (let r = 1; r <= radialSteps; r++) {
-                    const curR = (r / radialSteps) * radius;
-                    const stepsCircle = Math.floor(2 * Math.PI * curR * density);
-                    for (let i = 0; i < stepsCircle; i++) {
-                        const theta = (i / stepsCircle) * Math.PI * 2;
-                        coords.push({
-                            x: Math.cos(theta) * curR,
-                            y: yOffset + height,
-                            z: Math.sin(theta) * curR
-                        });
+                for (let t = 0; t <= 1; t += 0.025) {
+                    const y = y0 + (y1 - y0) * t;
+                    const radius = r0 + (r1 - r0) * t;
+                    const steps = Math.max(20, Math.floor(radius * 1.45));
+                    for (let i = 0; i < steps; i++) {
+                        const theta = (i / steps) * Math.PI * 2;
+                        if (Math.random() > 0.45) {
+                            addPoint(Math.cos(theta) * radius, y, Math.sin(theta) * radius * 0.72, 'cakeSpark');
+                        }
                     }
                 }
             }
 
-            // Vẽ các tầng bánh: Tầng dưới (bự nhất), tầng giữa, tầng trên (nhỏ nhất)
-            addCylinder(50, 32, -45, 0.7);
-            addCylinder(36, 26, -13, 0.7);
-            addCylinder(22, 22, 13, 0.7);
+            function addOrbit(radius, y, tilt, count) {
+                for (let i = 0; i < count; i++) {
+                    const t = (i / count) * Math.PI * 2;
+                    const x = Math.cos(t) * radius;
+                    const z = Math.sin(t) * radius * 0.34;
+                    const yy = y + Math.sin(t + tilt) * 5.5;
+                    for (let r = 0; r < 3; r++) {
+                        addPoint(x + jitter(2.2), yy + jitter(1.8), z + jitter(2.2), 'cakeOrbit');
+                    }
+                }
+            }
 
-            // Thêm cây nến nhỏ trên đỉnh
-            addCylinder(3, 16, 35, 0.8);
+            function addStar(cx, cy, cz) {
+                const canvas = document.createElement('canvas');
+                canvas.width = 180;
+                canvas.height = 180;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#fff';
+                ctx.translate(90, 90);
+                ctx.beginPath();
+                for (let i = 0; i < 10; i++) {
+                    const angle = -Math.PI / 2 + i * Math.PI / 5;
+                    const r = i % 2 === 0 ? 62 : 27;
+                    const x = Math.cos(angle) * r;
+                    const y = Math.sin(angle) * r;
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.closePath();
+                ctx.fill();
 
-            // Thêm ngọn lửa nến lấp lánh (dùng cụm hạt dày)
-            const flamePointsCount = 150;
-            for (let i = 0; i < flamePointsCount; i++) {
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+                for (let y = 0; y < canvas.height; y += 4) {
+                    for (let x = 0; x < canvas.width; x += 4) {
+                        if (imageData[(y * canvas.width + x) * 4] > 128) {
+                            addPoint(cx + (x - 90) * 0.22, cy - (y - 90) * 0.22, cz + jitter(5), 'cakeStar');
+                        }
+                    }
+                }
+            }
+
+            addConeTier(-58, -18, 62, 39, 3300);
+            addConeTier(-20, 24, 46, 24, 3000);
+            addConeTier(20, 66, 30, 9, 2300);
+            addOrbit(66, -38, 0.2, 210);
+            addOrbit(50, -2, 1.2, 190);
+            addOrbit(34, 34, 2.1, 150);
+            addStar(0, 84, 0);
+
+            for (let i = 0; i < 1600; i++) {
                 const theta = Math.random() * Math.PI * 2;
-                const phi = Math.acos((Math.random() - 0.5) * 2);
-                const r = Math.random() * 5.0;
-                coords.push({
-                    x: Math.cos(theta) * Math.sin(phi) * r,
-                    y: 54 + (Math.random() - 0.2) * 7, // Hơi thon dài lên trên
-                    z: Math.sin(theta) * Math.sin(phi) * r
-                });
+                const radius = 78 + Math.random() * 80;
+                const y = -70 + Math.random() * 170;
+                const z = Math.sin(theta) * radius * 0.55 + jitter(20);
+                addPoint(Math.cos(theta) * radius, y, z, Math.random() > 0.5 ? 'cakeSpark' : 'cakeGlow');
             }
 
             // Xáo trộn ngẫu nhiên để các hạt bay vào vị trí bánh sinh nhật từ mọi phía đều đặn
@@ -893,7 +1444,13 @@
 
         function triggerCakeStage() {
             currentMode = 'CAKE';
-            updateDebug("Đang bày bánh sinh nhật lung linh!");
+            focusedCardIndex = -1;
+            photoGroup.visible = false;
+            memoryCards.forEach(card => {
+                card.material.opacity = 0;
+                card.scale.set(1, 1, 1);
+            });
+            updateDebug("Đang bày bánh sinh nhật dạng sao lung linh!");
 
             // Dừng bắn pháo hoa
             if (fireworksInterval) clearInterval(fireworksInterval);
@@ -908,6 +1465,141 @@
             
             morphToShape(cakeCoords);
             resetSpeeds();
+            showCakeControls();
+        }
+
+        function getPhotoGalaxyCoordinates() {
+            const coords = [];
+            for (let i = 0; i < 10500; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const arm = Math.floor(Math.random() * 4);
+                const spiral = angle + arm * Math.PI * 0.5;
+                const radius = 28 + Math.pow(Math.random(), 0.55) * 160;
+                const y = (Math.random() - 0.5) * 150;
+                const twist = radius * 0.012;
+                coords.push({
+                    x: Math.cos(spiral + twist) * radius,
+                    y: y + Math.sin(radius * 0.04) * 12,
+                    z: Math.sin(spiral + twist) * radius * 0.72 + (Math.random() - 0.5) * 24,
+                    kind: 'photoGalaxy'
+                });
+            }
+
+            for (let i = 0; i < 1800; i++) {
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.acos((Math.random() - 0.5) * 2);
+                const radius = 115 + Math.random() * 95;
+                coords.push({
+                    x: Math.sin(phi) * Math.cos(theta) * radius,
+                    y: Math.cos(phi) * radius * 0.72,
+                    z: Math.sin(phi) * Math.sin(theta) * radius,
+                    kind: 'photoGalaxy'
+                });
+            }
+
+            return coords;
+        }
+
+        function triggerPhotoGalaxyStage() {
+            if (currentMode !== 'CAKE') return;
+            currentMode = 'PHOTO_GALAXY';
+            focusedCardIndex = -1;
+            updateDebug("Bánh bung thành vũ trụ ảnh kỷ niệm.");
+            cakeTitleEl.classList.remove('visible');
+            gesturePanelEl.classList.add('cake-mode');
+            gesturePanelEl.classList.add('visible');
+            gestureStatusEl.textContent = "Giơ 2 ngón để xem ảnh, nắm tay để quay lại bánh";
+
+            photoGroup.visible = true;
+            memoryCards.forEach((card, index) => {
+                card.material.opacity = 0.05;
+                card.userData.phase = (index / memoryCards.length) * Math.PI * 2;
+            });
+
+            morphToShape(getPhotoGalaxyCoordinates());
+            resetSpeeds();
+        }
+
+        function focusNextMemoryCard() {
+            if (currentMode !== 'PHOTO_GALAXY') return;
+            const now = performance.now();
+            if (now - lastPhotoFocusTime < 1200) return;
+            lastPhotoFocusTime = now;
+            focusedCardIndex = focusedCardIndex < 0 ? 0 : (focusedCardIndex + 1) % memoryCards.length;
+            gestureStatusEl.textContent = "Ảnh đang được kéo lại gần";
+        }
+
+        function getWishCardFrameCoordinates() {
+            const coords = [];
+            const width = 178;
+            const height = 112;
+            const z = 18;
+
+            function addSpark(x, y, kind = 'edge') {
+                coords.push({
+                    x: x + (Math.random() - 0.5) * 1.5,
+                    y: y + (Math.random() - 0.5) * 1.5,
+                    z: z + (Math.random() - 0.5) * 8,
+                    kind
+                });
+            }
+
+            for (let x = -width / 2; x <= width / 2; x += 4.2) {
+                if (Math.random() > 0.14) addSpark(x, -height / 2, 'edge');
+                if (Math.random() > 0.14) addSpark(x, height / 2, 'edge');
+            }
+            for (let y = -height / 2; y <= height / 2; y += 4.2) {
+                if (Math.random() > 0.14) addSpark(-width / 2, y, 'edge');
+                if (Math.random() > 0.14) addSpark(width / 2, y, 'edge');
+            }
+
+            for (let i = 0; i < 1500; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const r = Math.sqrt(Math.random());
+                const x = Math.cos(angle) * r * width * 0.68;
+                const y = Math.sin(angle) * r * height * 0.58;
+                const borderBias = Math.random() > 0.68 ? 1.0 : 0.45;
+                addSpark(x + Math.cos(angle) * width * 0.18 * borderBias, y + Math.sin(angle) * height * 0.16 * borderBias, 'core');
+            }
+
+            // Một vài hạt lấp lánh nhẹ quanh thiệp, không tạo nền rối.
+            for (let i = 0; i < 420; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const radius = 115 + Math.random() * 120;
+                coords.push({
+                    x: Math.cos(angle) * radius,
+                    y: Math.sin(angle) * radius * 0.62,
+                    z: -20 + Math.random() * 45,
+                    kind: 'ambient'
+                });
+            }
+
+            return coords;
+        }
+
+        function triggerWishCardStage() {
+            currentMode = 'WISH_CARD';
+            updateDebug("Đang mở lá thư chúc mừng.");
+            hideCakeChrome();
+
+            if (fireworksInterval) clearInterval(fireworksInterval);
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                pState[i] = 0;
+            }
+
+            particlesMesh.rotation.set(0, 0, 0);
+            const wishCoords = getWishCardFrameCoordinates();
+            wishCardParticleCount = wishCoords.length;
+            morphToShape(wishCoords);
+            resetSpeeds();
+
+            setTimeout(() => {
+                if (currentMode !== 'WISH_CARD') return;
+                wishCardEl.classList.add('visible');
+                wishCardEl.setAttribute('aria-hidden', 'false');
+                showGesturePanel();
+                enableHandGesture();
+            }, 900);
         }
 
         // ═══════════════════════════════════════════════════
@@ -963,22 +1655,34 @@
                         colArr[i3 + 2] = baseColors[i3 + 2] * ratio * 2.0;
                         
                     } else { // Ambient/inactive star
-                        // Từ từ trôi về vị trí nền ban đầu
-                        posArr[i3]     += (targetPositions[i3]     - posArr[i3])     * 0.02;
-                        posArr[i3 + 1] += (targetPositions[i3 + 1] - posArr[i3 + 1]) * 0.02;
-                        posArr[i3 + 2] += (targetPositions[i3 + 2] - posArr[i3 + 2]) * 0.02;
-                        
-                        const twinkle = Math.sin(elapsed * twinkleSpeed[i] + twinklePhase[i]);
-                        const boost = twinkle > 0.85 ? 1.5 : 1.0;
-                        colArr[i3]     = colors[i3]     * (0.35 + twinkle * 0.15) * boost;
-                        colArr[i3 + 1] = colors[i3 + 1] * (0.35 + twinkle * 0.15) * boost;
-                        colArr[i3 + 2] = colors[i3 + 2] * (0.35 + twinkle * 0.15) * boost;
+                        colArr[i3] = 0;
+                        colArr[i3 + 1] = 0;
+                        colArr[i3 + 2] = 0;
                     }
+                }
+            } else if (currentMode === 'PHOTO_GALAXY') {
+                particlesMesh.rotation.y = elapsed * 0.08;
+                particlesMesh.rotation.x = Math.sin(elapsed * 0.16) * 0.035;
+
+                for (let i = 0; i < PARTICLE_COUNT; i++) {
+                    const i3 = i * 3;
+
+                    posArr[i3]     += (targetPositions[i3]     - posArr[i3])     * speeds[i];
+                    posArr[i3 + 1] += (targetPositions[i3 + 1] - posArr[i3 + 1]) * speeds[i];
+                    posArr[i3 + 2] += (targetPositions[i3 + 2] - posArr[i3 + 2]) * speeds[i];
+
+                    const twinkle = Math.sin(elapsed * twinkleSpeed[i] + twinklePhase[i]);
+                    const sparkle = twinkle > 0.82 ? 1.85 : 1.0;
+                    const active = activeShapeKinds[i] === 6;
+                    const base = active ? (0.55 + twinkle * 0.16) * sparkle : 0.0;
+                    colArr[i3]     = 0.72 * base;
+                    colArr[i3 + 1] = 1.0 * base;
+                    colArr[i3 + 2] = 1.18 * base;
                 }
             } else if (currentMode === 'CAKE') {
                 // Quay bánh chậm rãi
-                particlesMesh.rotation.y = elapsed * 0.15;
-                particlesMesh.rotation.x = Math.sin(elapsed * 0.2) * 0.03;
+                particlesMesh.rotation.y = elapsed * 0.18;
+                particlesMesh.rotation.x = Math.sin(elapsed * 0.22) * 0.035;
 
                 for (let i = 0; i < PARTICLE_COUNT; i++) {
                     const i3 = i * 3;
@@ -990,21 +1694,33 @@
                     const twinkle = Math.sin(elapsed * twinkleSpeed[i] + twinklePhase[i]);
                     const boost = twinkle > 0.85 ? 1.5 : 1.0;
                     
-                    // Kiểm tra xem hạt có thuộc ngọn lửa nến không (150 hạt cuối của bánh sinh nhật)
-                    if (i >= cakeLength - 150 && i < cakeLength) {
-                        // Ngọn lửa màu cam vàng rực rỡ lấp lánh nhấp nháy
-                        colArr[i3]     = 1.0 * (0.8 + twinkle * 0.2) * boost;
-                        colArr[i3 + 1] = (0.55 + Math.sin(elapsed * 5.0 + i) * 0.15) * (0.8 + twinkle * 0.2) * boost;
-                        colArr[i3 + 2] = 0.0;
+                    const kind = activeShapeKinds[i];
+                    const pulse = 0.78 + twinkle * 0.18;
+                    if (kind === 2) {
+                        colArr[i3]     = 0.72 * pulse * boost;
+                        colArr[i3 + 1] = 1.25 * pulse * boost;
+                        colArr[i3 + 2] = 1.35 * pulse * boost;
+                    } else if (kind === 3) {
+                        const starPulse = 1.25 + Math.sin(elapsed * 5.5) * 0.35;
+                        colArr[i3]     = 1.35 * starPulse;
+                        colArr[i3 + 1] = 1.15 * starPulse;
+                        colArr[i3 + 2] = 0.72 * starPulse;
+                    } else if (kind === 4) {
+                        colArr[i3]     = 1.05 * pulse * boost;
+                        colArr[i3 + 1] = 1.12 * pulse * boost;
+                        colArr[i3 + 2] = 1.4 * pulse * boost;
+                    } else if (kind === 5 || kind === 1) {
+                        colArr[i3]     = 0.72 * pulse * boost;
+                        colArr[i3 + 1] = 0.84 * pulse * boost;
+                        colArr[i3 + 2] = 1.42 * pulse * boost;
                     } else {
-                        // Thân bánh màu hồng lấp lánh mặc định
-                        colArr[i3]     = colors[i3]     * (0.85 + twinkle * 0.15) * boost;
-                        colArr[i3 + 1] = colors[i3 + 1] * (0.85 + twinkle * 0.15) * boost;
-                        colArr[i3 + 2] = colors[i3 + 2] * (0.85 + twinkle * 0.15) * boost;
+                        colArr[i3] = 0;
+                        colArr[i3 + 1] = 0;
+                        colArr[i3 + 2] = 0;
                     }
                 }
             } else {
-                // Di chuyển lerp về hình dạng đích cho GIFT, COUNTDOWN, BIRTHDAY
+                // Di chuyển lerp về hình dạng đích cho GIFT, COUNTDOWN, tên/ngày sinh
                 for (let i = 0; i < PARTICLE_COUNT; i++) {
                     const i3 = i * 3;
 
@@ -1014,10 +1730,20 @@
 
                     const twinkle = Math.sin(elapsed * twinkleSpeed[i] + twinklePhase[i]);
                     const boost = twinkle > 0.85 ? 1.5 : 1.0;
+                    const giftAmbientDim = currentMode === 'GIFT' && particleKinds[i] === 0 ? 0.0 : 1.0;
+
+                    if (currentMode === 'WISH_CARD') {
+                        const active = i < wishCardParticleCount;
+                        const warmth = active ? (0.7 + twinkle * 0.16) * boost : 0.04;
+                        colArr[i3]     = 1.15 * warmth;
+                        colArr[i3 + 1] = 0.62 * warmth;
+                        colArr[i3 + 2] = 0.88 * warmth;
+                        continue;
+                    }
                     
-                    colArr[i3]     = colors[i3]     * (0.85 + twinkle * 0.15) * boost;
-                    colArr[i3 + 1] = colors[i3 + 1] * (0.85 + twinkle * 0.15) * boost;
-                    colArr[i3 + 2] = colors[i3 + 2] * (0.85 + twinkle * 0.15) * boost;
+                    colArr[i3]     = colors[i3]     * (0.85 + twinkle * 0.15) * boost * giftAmbientDim;
+                    colArr[i3 + 1] = colors[i3 + 1] * (0.85 + twinkle * 0.15) * boost * giftAmbientDim;
+                    colArr[i3 + 2] = colors[i3 + 2] * (0.85 + twinkle * 0.15) * boost * giftAmbientDim;
                 }
             }
 
@@ -1031,25 +1757,76 @@
                 if (currentMode === 'COUNTDOWN') stateText = "Đang đếm ngược";
                 else if (currentMode === 'BIRTHDAY') stateText = "Đang hiển thị Happy Birthday";
                 else if (currentMode === 'FIREWORKS') stateText = "Đang trình diễn pháo hoa";
+                else if (currentMode === 'WISH_CARD') stateText = "Đang mở lá thư chúc mừng";
                 else if (currentMode === 'CAKE') stateText = "Đang hiển thị bánh sinh nhật";
+                else if (currentMode === 'PHOTO_GALAXY') stateText = "Đang mở vũ trụ ảnh";
                 updateDebug(`${stateText}.<br>Hạt 0: (${posArr[0].toFixed(1)}, ${posArr[1].toFixed(1)}, ${posArr[2].toFixed(1)}) | Màu: (${colArr[0].toFixed(2)}, ${colArr[1].toFixed(2)}, ${colArr[2].toFixed(2)})`);
             }
 
             // Hiệu ứng kích thước nhấp nháy toàn cục: hạt pháo hoa to hơn, rực rỡ hơn
             if (currentMode === 'FIREWORKS') {
                 material.size = 7.5 + Math.sin(elapsed * 2.8) * 1.3 + Math.sin(elapsed * 6.0) * 0.6;
+            } else if (currentMode === 'GIFT') {
+                material.size = 3.2 + Math.sin(elapsed * 1.2) * 0.25 + Math.sin(elapsed * 4.0) * 0.12;
+            } else if (currentMode === 'WISH_CARD') {
+                material.size = 4.1 + Math.sin(elapsed * 1.5) * 0.28;
+            } else if (currentMode === 'CAKE') {
+                material.size = 4.55 + Math.sin(elapsed * 1.9) * 0.4;
+            } else if (currentMode === 'PHOTO_GALAXY') {
+                material.size = 3.6 + Math.sin(elapsed * 1.5) * 0.28;
             } else {
                 material.size = 5 + Math.sin(elapsed * 1.8) * 0.7 + Math.sin(elapsed * 4.5) * 0.4;
             }
 
+            giftGlow.visible = currentMode === 'GIFT';
+            if (giftGlow.visible) {
+                const glowPulse = 0.5 + Math.sin(elapsed * 1.15) * 0.5;
+                giftGlow.material.opacity = 0.2 + glowPulse * 0.15;
+                giftGlow.scale.set(170 + glowPulse * 18, 142 + glowPulse * 14, 1);
+            }
+
             // Xoay nhẹ bồng bềnh (chỉ khi không ở chế độ bánh sinh nhật)
-            if (currentMode !== 'CAKE') {
+            if (currentMode !== 'CAKE' && currentMode !== 'PHOTO_GALAXY') {
                 particlesMesh.rotation.y = Math.sin(elapsed * 0.12) * 0.06;
                 particlesMesh.rotation.x = Math.cos(elapsed * 0.08) * 0.02;
             }
 
             // Hiệu ứng lơ lửng nhấp nhô lên xuống (floating bob)
             particlesMesh.position.y = Math.sin(elapsed * 0.5) * 5;
+
+            if (photoGroup.visible) {
+                photoGroup.rotation.y = elapsed * 0.035;
+                memoryCards.forEach((card, index) => {
+                    if (currentMode !== 'PHOTO_GALAXY') {
+                        card.material.opacity += (0 - card.material.opacity) * 0.08;
+                        return;
+                    }
+
+                    const focused = index === focusedCardIndex;
+                    const phase = card.userData.phase + elapsed * card.userData.speed;
+                    const orbit = card.userData.orbit;
+                    const targetX = Math.cos(phase) * orbit;
+                    const targetY = card.userData.height + Math.sin(phase * 1.4) * 9;
+                    const targetZ = Math.sin(phase) * orbit * 0.72;
+
+                    if (focused) {
+                        card.position.x += (0 - card.position.x) * 0.12;
+                        card.position.y += (0 - card.position.y) * 0.12;
+                        card.position.z += (82 - card.position.z) * 0.12;
+                        card.scale.x += (2.05 - card.scale.x) * 0.12;
+                        card.scale.y += (2.05 - card.scale.y) * 0.12;
+                        card.material.opacity += (1 - card.material.opacity) * 0.12;
+                    } else {
+                        card.position.x += (targetX - card.position.x) * 0.08;
+                        card.position.y += (targetY - card.position.y) * 0.08;
+                        card.position.z += (targetZ - card.position.z) * 0.08;
+                        card.scale.x += (1 - card.scale.x) * 0.1;
+                        card.scale.y += (1 - card.scale.y) * 0.1;
+                        card.material.opacity += ((focusedCardIndex >= 0 ? 0.42 : 0.86) - card.material.opacity) * 0.08;
+                    }
+                    card.lookAt(camera.position);
+                });
+            }
 
             renderer.render(scene, camera);
         }
@@ -1133,30 +1910,240 @@
         document.addEventListener('webkitfullscreenchange', updateFullscreenIcon);
 
         // ═══════════════════════════════════════════════════
-        //  8. KỊCH BẢN CHÍNH: HỘP QUÀ → NỔ TUNG → ĐẾM NGƯỢC → HAPPY BIRTHDAY → PHÁO HOA
+        //  8. KỊCH BẢN CHÍNH: HỘP QUÀ → NỔ TUNG → ĐẾM NGƯỢC → TÊN/NGÀY SINH → PHÁO HOA → LÁ THƯ
         // ═══════════════════════════════════════════════════
         const sleep = (ms) => new Promise(r => setTimeout(r, ms));
         const hintEl = document.getElementById('click-hint');
         const clickZone = document.getElementById('gift-click-zone');
+        const wishCardEl = document.getElementById('wish-card');
+        const gesturePanelEl = document.getElementById('gesture-panel');
+        const gestureToggleEl = document.getElementById('gesture-toggle');
+        const gestureStatusEl = document.getElementById('gesture-status');
+        const cameraPreviewEl = document.getElementById('camera-preview');
+        const cakeTitleEl = document.getElementById('cake-title');
         const loadTime = Date.now();
 
         // Xử lý click: mở quà → nổ tung → đếm ngược
         let giftOpened = false;
         let currentSequenceId = 0;
+        let handsDetector = null;
+        let handsCamera = null;
+        let gestureEnabled = false;
+        let fistFrames = 0;
+        let openPalmFrames = 0;
+        let peaceFrames = 0;
+        let galaxyFistFrames = 0;
+        let letterTransitioning = false;
 
-        function updateActiveButton(stageId) {
-            document.querySelectorAll('.control-btn').forEach(btn => {
-                btn.classList.remove('active');
+        function hideWishCard() {
+            wishCardEl.classList.remove('visible');
+            wishCardEl.classList.remove('folding');
+            wishCardEl.setAttribute('aria-hidden', 'true');
+            gesturePanelEl.classList.remove('visible');
+            gesturePanelEl.setAttribute('aria-hidden', 'true');
+        }
+
+        function hideCakeChrome() {
+            cakeTitleEl.classList.remove('visible');
+            cakeTitleEl.setAttribute('aria-hidden', 'true');
+            gesturePanelEl.classList.remove('cake-mode');
+            photoGroup.visible = false;
+            memoryCards.forEach(card => {
+                card.material.opacity = 0;
             });
-            const activeBtn = document.getElementById(`btn-${stageId}`);
-            if (activeBtn) activeBtn.classList.add('active');
+        }
+
+        function showCakeControls() {
+            cakeTitleEl.classList.add('visible');
+            cakeTitleEl.setAttribute('aria-hidden', 'false');
+            gesturePanelEl.classList.add('cake-mode');
+            gesturePanelEl.classList.add('visible');
+            gesturePanelEl.setAttribute('aria-hidden', 'false');
+            gestureStatusEl.textContent = gestureEnabled ? "Mở 5 ngón để bung bánh thành ảnh" : "Cho phép camera rồi mở 5 ngón";
+            enableHandGesture();
+        }
+
+        function showGesturePanel() {
+            gesturePanelEl.classList.add('visible');
+            gesturePanelEl.setAttribute('aria-hidden', 'false');
+        }
+
+        function foldedFinger(landmarks, tip, pip) {
+            return landmarks[tip].y > landmarks[pip].y + 0.015;
+        }
+
+        function extendedFinger(landmarks, tip, pip) {
+            return landmarks[tip].y < landmarks[pip].y - 0.025;
+        }
+
+        function isClosedFist(landmarks) {
+            if (!landmarks) return false;
+            const fingersFolded =
+                foldedFinger(landmarks, 8, 6) &&
+                foldedFinger(landmarks, 12, 10) &&
+                foldedFinger(landmarks, 16, 14) &&
+                foldedFinger(landmarks, 20, 18);
+
+            const thumbTip = landmarks[4];
+            const indexMcp = landmarks[5];
+            const pinkyMcp = landmarks[17];
+            const thumbInsidePalm =
+                thumbTip.x > Math.min(indexMcp.x, pinkyMcp.x) - 0.05 &&
+                thumbTip.x < Math.max(indexMcp.x, pinkyMcp.x) + 0.05;
+
+            return fingersFolded && thumbInsidePalm;
+        }
+
+        function isOpenPalm(landmarks) {
+            if (!landmarks) return false;
+            return extendedFinger(landmarks, 8, 6) &&
+                extendedFinger(landmarks, 12, 10) &&
+                extendedFinger(landmarks, 16, 14) &&
+                extendedFinger(landmarks, 20, 18);
+        }
+
+        function isPeaceSign(landmarks) {
+            if (!landmarks) return false;
+            return extendedFinger(landmarks, 8, 6) &&
+                extendedFinger(landmarks, 12, 10) &&
+                foldedFinger(landmarks, 16, 14) &&
+                foldedFinger(landmarks, 20, 18);
+        }
+
+        function onHandsResults(results) {
+            if (!gestureEnabled || letterTransitioning) return;
+
+            const landmarks = results.multiHandLandmarks && results.multiHandLandmarks[0];
+
+            if (currentMode === 'WISH_CARD') {
+                if (isClosedFist(landmarks)) {
+                    fistFrames++;
+                    gestureStatusEl.textContent = fistFrames > 5 ? "Đang gấp thư..." : "Giữ nắm tay...";
+                    if (fistFrames >= 9) {
+                        foldLetterAndContinue();
+                    }
+                } else {
+                    fistFrames = Math.max(0, fistFrames - 1);
+                    gestureStatusEl.textContent = "Nắm tay để gấp thư";
+                }
+                return;
+            }
+
+            if (currentMode === 'CAKE') {
+                if (isOpenPalm(landmarks)) {
+                    openPalmFrames++;
+                    gestureStatusEl.textContent = openPalmFrames > 4 ? "Bánh đang bung thành ảnh..." : "Giữ 5 ngón mở...";
+                    if (openPalmFrames >= 8) {
+                        openPalmFrames = 0;
+                        triggerPhotoGalaxyStage();
+                    }
+                } else {
+                    openPalmFrames = Math.max(0, openPalmFrames - 1);
+                    gestureStatusEl.textContent = "Mở 5 ngón để bung bánh thành ảnh";
+                }
+                return;
+            }
+
+            if (currentMode === 'PHOTO_GALAXY') {
+                if (isClosedFist(landmarks)) {
+                    galaxyFistFrames++;
+                    gestureStatusEl.textContent = galaxyFistFrames > 4 ? "Đang gom ảnh về bánh..." : "Giữ nắm tay để quay lại";
+                    if (galaxyFistFrames >= 8) {
+                        galaxyFistFrames = 0;
+                        triggerCakeStage();
+                    }
+                    return;
+                }
+
+                if (isPeaceSign(landmarks)) {
+                    peaceFrames++;
+                    if (peaceFrames >= 7) {
+                        peaceFrames = 0;
+                        focusNextMemoryCard();
+                    }
+                } else {
+                    peaceFrames = Math.max(0, peaceFrames - 1);
+                    if (focusedCardIndex >= 0) {
+                        gestureStatusEl.textContent = "Giơ 2 ngón để đổi ảnh, nắm tay để quay lại";
+                    } else {
+                        gestureStatusEl.textContent = "Giơ 2 ngón để xem ảnh, nắm tay để quay lại bánh";
+                    }
+                }
+                return;
+            }
+        }
+
+        async function enableHandGesture() {
+            if (gestureEnabled) return;
+            if (!window.Hands || !window.Camera) {
+                gestureStatusEl.textContent = "Không tải được nhận diện tay";
+                gestureToggleEl.style.display = 'inline-block';
+                return;
+            }
+
+            try {
+                gestureToggleEl.style.display = 'none';
+                gestureStatusEl.textContent = "Hãy cho phép quyền camera";
+                handsDetector = new window.Hands({
+                    locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+                });
+                handsDetector.setOptions({
+                    maxNumHands: 1,
+                    modelComplexity: 1,
+                    minDetectionConfidence: 0.68,
+                    minTrackingConfidence: 0.62
+                });
+                handsDetector.onResults(onHandsResults);
+
+                handsCamera = new window.Camera(cameraPreviewEl, {
+                    onFrame: async () => {
+                        await handsDetector.send({ image: cameraPreviewEl });
+                    },
+                    width: 320,
+                    height: 240
+                });
+
+                await handsCamera.start();
+                gestureEnabled = true;
+                gestureToggleEl.style.display = 'none';
+                if (currentMode === 'CAKE') {
+                    gestureStatusEl.textContent = "Mở 5 ngón để bung bánh thành ảnh";
+                } else if (currentMode === 'PHOTO_GALAXY') {
+                    gestureStatusEl.textContent = "Giơ 2 ngón để xem ảnh, nắm tay để quay lại bánh";
+                } else {
+                    gestureStatusEl.textContent = "Nắm tay để gấp thư";
+                }
+            } catch (error) {
+                console.error(error);
+                gestureStatusEl.textContent = "Bấm để cấp quyền camera";
+                gestureToggleEl.style.display = 'inline-block';
+                gestureToggleEl.disabled = false;
+            }
+        }
+
+        function foldLetterAndContinue() {
+            if (letterTransitioning) return;
+            letterTransitioning = true;
+            fistFrames = 0;
+            gesturePanelEl.classList.remove('visible');
+            wishCardEl.classList.remove('visible');
+            wishCardEl.classList.add('folding');
+            updateDebug("Đã nhận nắm tay. Lá thư đang gấp lại.");
+
+            setTimeout(() => {
+                hideWishCard();
+                currentSequenceId++;
+                letterTransitioning = false;
+                triggerCakeStage();
+            }, 1200);
         }
 
         async function showGiftStage() {
             currentSequenceId++;
             currentMode = 'GIFT';
             giftOpened = false;
-            updateActiveButton('gift');
+            hideWishCard();
+            hideCakeChrome();
             
             // Hiện vùng click và chữ gợi ý
             clickZone.style.pointerEvents = 'auto';
@@ -1178,7 +2165,8 @@
             const seqId = currentSequenceId;
             currentMode = 'COUNTDOWN';
             giftOpened = true;
-            updateActiveButton('countdown');
+            hideWishCard();
+            hideCakeChrome();
             
             clickZone.style.pointerEvents = 'none';
             clickZone.style.display = 'none';
@@ -1200,7 +2188,6 @@
             
             // Tự động chuyển tiếp
             currentMode = 'BIRTHDAY';
-            updateActiveButton('birthday');
             const bdayCoords = getBirthdayCoordinates();
             updateDebug(`Đang hiển thị chữ HAPPY BIRTHDAY (${bdayCoords.length} hạt)...`);
             morphToShape(bdayCoords);
@@ -1208,22 +2195,32 @@
             await sleep(4500);
             if (seqId !== currentSequenceId) return;
 
-            currentMode = 'FIREWORKS';
-            updateActiveButton('fireworks');
-            triggerInitialTextBurst();
-            
-            await sleep(7500);
+            const nameCoords = getNameBirthdateCoordinates();
+            updateDebug(`Đang chuyển thành GIANG LƯU - 03/07/2005 (${nameCoords.length} hạt)...`);
+            morphToShape(nameCoords);
+            await sleep(1800);
             if (seqId !== currentSequenceId) return;
 
-            updateActiveButton('cake');
-            triggerCakeStage();
+            await shatterCurrentTextIntoSparkles();
+            if (seqId !== currentSequenceId) return;
+
+            currentMode = 'FIREWORKS';
+            triggerInitialTextBurst();
+            
+            await sleep(5600);
+            if (seqId !== currentSequenceId) return;
+            await playFireworkFinale();
+            if (seqId !== currentSequenceId) return;
+
+            triggerWishCardStage();
         }
 
         function showBirthdayStage() {
             currentSequenceId++;
             currentMode = 'BIRTHDAY';
             giftOpened = true;
-            updateActiveButton('birthday');
+            hideWishCard();
+            hideCakeChrome();
             
             clickZone.style.pointerEvents = 'none';
             clickZone.style.display = 'none';
@@ -1244,7 +2241,8 @@
             currentSequenceId++;
             currentMode = 'FIREWORKS';
             giftOpened = true;
-            updateActiveButton('fireworks');
+            hideWishCard();
+            hideCakeChrome();
             
             clickZone.style.pointerEvents = 'none';
             clickZone.style.display = 'none';
@@ -1261,7 +2259,8 @@
         function showCakeStage() {
             currentSequenceId++;
             giftOpened = true;
-            updateActiveButton('cake');
+            hideWishCard();
+            hideCakeChrome();
             
             clickZone.style.pointerEvents = 'none';
             clickZone.style.display = 'none';
@@ -1276,6 +2275,8 @@
 
             currentSequenceId++;
             const seqId = currentSequenceId;
+            hideWishCard();
+            hideCakeChrome();
 
             // Ẩn vùng click và chữ gợi ý
             clickZone.style.pointerEvents = 'none';
@@ -1290,7 +2291,6 @@
 
             // === GIAI ĐOẠN 2: ĐẾM NGƯỢC ===
             currentMode = 'COUNTDOWN';
-            updateActiveButton('countdown');
             resetSpeeds();
 
             for (let i = 5; i >= 1; i--) {
@@ -1305,7 +2305,6 @@
             
             // === GIAI ĐOẠN 3: HAPPY BIRTHDAY ===
             currentMode = 'BIRTHDAY';
-            updateActiveButton('birthday');
             const bdayCoords = getBirthdayCoordinates();
             updateDebug(`Đang hiển thị chữ HAPPY BIRTHDAY (${bdayCoords.length} hạt)...`);
             morphToShape(bdayCoords);
@@ -1313,17 +2312,26 @@
             await sleep(4500);
             if (seqId !== currentSequenceId) return;
 
-            // === GIAI ĐOẠN 4: PHÁO HOA RỰC RỠ ===
-            currentMode = 'FIREWORKS';
-            updateActiveButton('fireworks');
-            triggerInitialTextBurst();
-            
-            await sleep(7500); // bắn pháo hoa hoành tráng trong 7.5s
+            const nameCoords = getNameBirthdateCoordinates();
+            updateDebug(`Đang chuyển thành GIANG LƯU - 03/07/2005 (${nameCoords.length} hạt)...`);
+            morphToShape(nameCoords);
+            await sleep(1800);
             if (seqId !== currentSequenceId) return;
 
-            // === GIAI ĐOẠN 5: BÁNH SINH NHẬT 3D ===
-            updateActiveButton('cake');
-            triggerCakeStage();
+            await shatterCurrentTextIntoSparkles();
+            if (seqId !== currentSequenceId) return;
+
+            // === GIAI ĐOẠN 4: PHÁO HOA RỰC RỠ ===
+            currentMode = 'FIREWORKS';
+            triggerInitialTextBurst();
+            
+            await sleep(5600); // bắn pháo hoa trước khi bước vào finale
+            if (seqId !== currentSequenceId) return;
+            await playFireworkFinale();
+            if (seqId !== currentSequenceId) return;
+
+            // === GIAI ĐOẠN 5: LÁ THƯ CHÚC MỪNG ===
+            triggerWishCardStage();
         }
 
         clickZone.addEventListener('click', async (event) => {
@@ -1347,12 +2355,8 @@
             startFullSequence();
         });
 
-        // Gắn sự kiện click cho bảng điều khiển
-        document.getElementById('btn-gift').addEventListener('click', () => showGiftStage());
-        document.getElementById('btn-countdown').addEventListener('click', () => showCountdownStage());
-        document.getElementById('btn-birthday').addEventListener('click', () => showBirthdayStage());
-        document.getElementById('btn-fireworks').addEventListener('click', () => showFireworksStage());
-        document.getElementById('btn-cake').addEventListener('click', () => showCakeStage());
+        gestureToggleEl.addEventListener('click', enableHandGesture);
+
     </script>
 </body>
 </html>
