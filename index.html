@@ -1019,6 +1019,12 @@
         let prevHandX = null;
         let wasPinching = false;
         let galaxyRotationY = 0;
+        let rotationVelocity = 0.0045; // Mặc định xoay tự động chậm rãi
+        let handCursorX = 0;
+        let handCursorY = 0;
+        let targetHandCursorX = 0;
+        let targetHandCursorY = 0;
+        let handCursorVisible = false;
 
         const sparkleTexture = createSparkleTexture();
 
@@ -2246,9 +2252,20 @@
             particlesMesh.position.y = Math.sin(elapsed * 0.5) * 5;
 
             if (photoGroup.visible) {
-                // Xoay chậm quả cầu nếu không có tay hoặc chuột xoay
-                if (focusedCardIndex < 0 && prevHandX === null) {
-                    galaxyRotationY += 0.0045; // Xoay tự động chậm rãi
+                if (focusedCardIndex < 0) {
+                    if (prevHandX !== null) {
+                        // Đang có tay di chuyển -> xoay theo tốc độ của tay
+                        galaxyRotationY += rotationVelocity;
+                    } else {
+                        // Thả tay ra -> tiếp tục chạy theo quán tính
+                        if (Math.abs(rotationVelocity) > 0.0045) {
+                            galaxyRotationY += rotationVelocity;
+                            rotationVelocity *= 0.95; // Giảm dần tốc độ (quán tính)
+                        } else {
+                            rotationVelocity = 0.0045; // Chuyển về tốc độ tự quay mặc định
+                            galaxyRotationY += rotationVelocity;
+                        }
+                    }
                 }
                 photoGroup.rotation.y = galaxyRotationY;
 
@@ -2292,6 +2309,20 @@
                     }
                     card.lookAt(camera.position);
                 });
+            }
+
+            // Cập nhật con trỏ tay mượt mà (chống rung lắc)
+            const cursorEl = document.getElementById('hand-cursor');
+            if (cursorEl) {
+                if (handCursorVisible) {
+                    cursorEl.style.display = 'block';
+                    handCursorX += (targetHandCursorX - handCursorX) * 0.22;
+                    handCursorY += (targetHandCursorY - handCursorY) * 0.22;
+                    cursorEl.style.left = `${handCursorX}px`;
+                    cursorEl.style.top = `${handCursorY}px`;
+                } else {
+                    cursorEl.style.display = 'none';
+                }
             }
 
             renderer.render(scene, camera);
@@ -2559,49 +2590,54 @@
             gesturePanelEl.setAttribute('aria-hidden', 'false');
         }
 
-        function foldedFinger(landmarks, tip, pip) {
-            return landmarks[tip].y > landmarks[pip].y + 0.015;
+        function getDistance(p1, p2) {
+            const w = (cameraPreviewEl && cameraPreviewEl.videoWidth) || 320;
+            const h = (cameraPreviewEl && cameraPreviewEl.videoHeight) || 240;
+            const dx = (p1.x - p2.x) * w;
+            const dy = (p1.y - p2.y) * h;
+            const dz = (p1.z - p2.z) * w;
+            return Math.sqrt(dx*dx + dy*dy + dz*dz);
         }
 
-        function extendedFinger(landmarks, tip, pip) {
-            return landmarks[tip].y < landmarks[pip].y - 0.025;
+        function isFingerFolded(landmarks, tip, pip) {
+            const dTip = getDistance(landmarks[tip], landmarks[0]);
+            const dPip = getDistance(landmarks[pip], landmarks[0]);
+            return dTip < dPip;
+        }
+
+        function isFingerExtended(landmarks, tip, pip) {
+            const dTip = getDistance(landmarks[tip], landmarks[0]);
+            const dPip = getDistance(landmarks[pip], landmarks[0]);
+            return dTip > dPip * 1.15;
         }
 
         function isClosedFist(landmarks) {
             if (!landmarks) return false;
-            const fingersFolded =
-                foldedFinger(landmarks, 8, 6) &&
-                foldedFinger(landmarks, 12, 10) &&
-                foldedFinger(landmarks, 16, 14) &&
-                foldedFinger(landmarks, 20, 18);
-
-            const thumbTip = landmarks[4];
-            const indexMcp = landmarks[5];
-            const pinkyMcp = landmarks[17];
-            const thumbInsidePalm =
-                thumbTip.x > Math.min(indexMcp.x, pinkyMcp.x) - 0.05 &&
-                thumbTip.x < Math.max(indexMcp.x, pinkyMcp.x) + 0.05;
-
-            return fingersFolded && thumbInsidePalm;
+            let foldedCount = 0;
+            if (isFingerFolded(landmarks, 8, 6)) foldedCount++;
+            if (isFingerFolded(landmarks, 12, 10)) foldedCount++;
+            if (isFingerFolded(landmarks, 16, 14)) foldedCount++;
+            if (isFingerFolded(landmarks, 20, 18)) foldedCount++;
+            return foldedCount >= 3;
         }
 
         function isOpenPalm(landmarks) {
             if (!landmarks) return false;
-            return extendedFinger(landmarks, 8, 6) &&
-                extendedFinger(landmarks, 12, 10) &&
-                extendedFinger(landmarks, 16, 14) &&
-                extendedFinger(landmarks, 20, 18);
+            let extendedCount = 0;
+            if (isFingerExtended(landmarks, 8, 6)) extendedCount++;
+            if (isFingerExtended(landmarks, 12, 10)) extendedCount++;
+            if (isFingerExtended(landmarks, 16, 14)) extendedCount++;
+            if (isFingerExtended(landmarks, 20, 18)) extendedCount++;
+            return extendedCount >= 3;
         }
 
         function isPinch(landmarks) {
             if (!landmarks) return false;
-            const thumbTip = landmarks[4];
-            const indexTip = landmarks[8];
-            const dx = thumbTip.x - indexTip.x;
-            const dy = thumbTip.y - indexTip.y;
-            const dz = thumbTip.z - indexTip.z;
-            const dist = Math.sqrt(dx*dx + dy*dy + dz*dz);
-            return dist < 0.055; // Ngưỡng chụm 2 ngón tay
+            const palmScale = getDistance(landmarks[0], landmarks[9]);
+            if (palmScale < 1) return false;
+            const pinchDist = getDistance(landmarks[4], landmarks[8]);
+            const ratio = pinchDist / palmScale;
+            return ratio < 0.38;
         }
 
         function onHandsResults(results) {
@@ -2613,6 +2649,7 @@
             if (!landmarks) {
                 if (cursorEl) cursorEl.style.display = 'none';
                 prevHandX = null;
+                handCursorVisible = false;
             }
 
             if (currentMode === 'WISH_CARD') {
@@ -2646,11 +2683,11 @@
 
             if (currentMode === 'PHOTO_GALAXY') {
                 if (landmarks) {
-                    if (cursorEl) {
-                        cursorEl.style.display = 'block';
-                        cursorEl.style.left = `${(1 - landmarks[8].x) * window.innerWidth}px`;
-                        cursorEl.style.top = `${landmarks[8].y * window.innerHeight}px`;
-                    }
+                    handCursorVisible = true;
+                    targetHandCursorX = (1 - landmarks[8].x) * window.innerWidth;
+                    targetHandCursorY = landmarks[8].y * window.innerHeight;
+                } else {
+                    handCursorVisible = false;
                 }
 
                 // 1. Cử chỉ cụm 5 ngón (closed fist) -> Đóng vũ trụ ảnh, quay lại bánh
@@ -2676,8 +2713,9 @@
 
                 if (pinching && !wasPinching) {
                     // Phát hiện chạm chụm ngón tay xuống (pinch down)
-                    const cursorX = (1 - landmarks[8].x) * 2 - 1;
-                    const cursorY = 1 - landmarks[8].y * 2;
+                    // Sử dụng tọa độ con trỏ tay đã làm mượt (smooth) từ handCursorX/Y
+                    const cursorX = (handCursorX / window.innerWidth) * 2 - 1;
+                    const cursorY = -(handCursorY / window.innerHeight) * 2 + 1;
                     raycaster.setFromCamera(new THREE.Vector2(cursorX, cursorY), camera);
                     const clickedIndex = findClosestCardToRay(raycaster.ray);
 
@@ -2715,10 +2753,11 @@
 
                 // 3. Cử chỉ mở 5 ngón di chuyển trái/phải -> Xoay quả cầu ảnh
                 if (isOpenPalm(landmarks) && !pinching) {
-                    const currentHandX = landmarks[9].x;
+                    const currentHandX = (1 - landmarks[9].x) * window.innerWidth;
                     if (prevHandX !== null) {
                         const deltaX = currentHandX - prevHandX;
-                        galaxyRotationY += deltaX * -6.0;
+                        // Lưu vận tốc xoay tỉ lệ với di chuyển vật lý
+                        rotationVelocity = deltaX * 0.0018;
                     }
                     prevHandX = currentHandX;
                     if (focusedCardIndex < 0) {
@@ -2751,8 +2790,8 @@
                 handsDetector.setOptions({
                     maxNumHands: 1,
                     modelComplexity: 1,
-                    minDetectionConfidence: 0.68,
-                    minTrackingConfidence: 0.62
+                    minDetectionConfidence: 0.48,
+                    minTrackingConfidence: 0.48
                 });
                 handsDetector.onResults(onHandsResults);
 
