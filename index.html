@@ -1017,9 +1017,12 @@
         let focusedCardIndex = -1;
         let lastPhotoFocusTime = 0;
         let prevHandX = null;
+        let prevHandY = null;
         let wasPinching = false;
         let galaxyRotationY = 0;
-        let rotationVelocity = 0.0045; // Mặc định xoay tự động chậm rãi
+        let galaxyRotationX = 0;
+        let rotationVelocityY = 0.0045; // Mặc định xoay tự động chậm rãi Y
+        let rotationVelocityX = 0;
         let handCursorX = 0;
         let handCursorY = 0;
         let targetHandCursorX = 0;
@@ -1832,7 +1835,11 @@
             currentMode = 'PHOTO_GALAXY';
             focusedCardIndex = -1;
             galaxyRotationY = 0;
+            galaxyRotationX = 0;
+            rotationVelocityY = 0.0045;
+            rotationVelocityX = 0;
             prevHandX = null;
+            prevHandY = null;
             wasPinching = false;
             updateDebug("Bánh bung thành vũ trụ ảnh kỷ niệm.");
             cakeTitleEl.classList.remove('visible');
@@ -2253,21 +2260,31 @@
 
             if (photoGroup.visible) {
                 if (focusedCardIndex < 0) {
-                    if (prevHandX !== null) {
+                    if (prevHandX !== null && prevHandY !== null) {
                         // Đang có tay di chuyển -> xoay theo tốc độ của tay
-                        galaxyRotationY += rotationVelocity;
+                        galaxyRotationY += rotationVelocityY;
+                        galaxyRotationX += rotationVelocityX;
                     } else {
-                        // Thả tay ra -> tiếp tục chạy theo quán tính
-                        if (Math.abs(rotationVelocity) > 0.0045) {
-                            galaxyRotationY += rotationVelocity;
-                            rotationVelocity *= 0.95; // Giảm dần tốc độ (quán tính)
+                        // Thả tay ra -> tiếp tục chạy theo quán tính cho trục Y (ngang)
+                        if (Math.abs(rotationVelocityY) > 0.0045) {
+                            galaxyRotationY += rotationVelocityY;
+                            rotationVelocityY *= 0.95; // Giảm dần tốc độ Y
                         } else {
-                            rotationVelocity = 0.0045; // Chuyển về tốc độ tự quay mặc định
-                            galaxyRotationY += rotationVelocity;
+                            rotationVelocityY = 0.0045; // Chuyển về tốc độ tự quay mặc định Y
+                            galaxyRotationY += rotationVelocityY;
+                        }
+
+                        // Thả tay ra -> tiếp tục chạy theo quán tính cho trục X (dọc)
+                        if (Math.abs(rotationVelocityX) > 0.0005) {
+                            galaxyRotationX += rotationVelocityX;
+                            rotationVelocityX *= 0.95; // Giảm dần tốc độ X
+                        } else {
+                            rotationVelocityX = 0; // Trục X không tự quay dọc để tránh chóng mặt
                         }
                     }
                 }
                 photoGroup.rotation.y = galaxyRotationY;
+                photoGroup.rotation.x = galaxyRotationX;
 
                 memoryCards.forEach((card, index) => {
                     if (currentMode !== 'PHOTO_GALAXY') {
@@ -2277,17 +2294,17 @@
 
                     const focused = index === focusedCardIndex;
                     if (focused) {
-                        // Tính toán tọa độ cục bộ tương đương thế giới (0, 0, 82)
+                        // Tính toán tọa độ cục bộ tương đương thế giới (0, 0, 82) khi xoay theo cả trục Y và X
                         const targetLX = -82 * Math.sin(galaxyRotationY);
-                        const targetLY = 0;
-                        const targetLZ = 82 * Math.cos(galaxyRotationY);
+                        const targetLY = 82 * Math.cos(galaxyRotationY) * Math.sin(galaxyRotationX);
+                        const targetLZ = 82 * Math.cos(galaxyRotationY) * Math.cos(galaxyRotationX);
 
                         card.position.x += (targetLX - card.position.x) * 0.12;
                         card.position.y += (targetLY - card.position.y) * 0.12;
                         card.position.z += (targetLZ - card.position.z) * 0.12;
 
-                        card.scale.x += (2.25 - card.scale.x) * 0.12;
-                        card.scale.y += (2.25 - card.scale.y) * 0.12;
+                        card.scale.x += (3.0 - card.scale.x) * 0.12; // Phóng to lên 3.0 (trước là 2.25)
+                        card.scale.y += (3.0 - card.scale.y) * 0.12;
                         card.material.opacity += (1 - card.material.opacity) * 0.12;
                     } else {
                         // Trả về vị trí cũ trên bề mặt quả cầu 3D
@@ -2299,7 +2316,7 @@
                         card.position.y += (targetY - card.position.y) * 0.08;
                         card.position.z += (targetZ - card.position.z) * 0.08;
 
-                        const targetScale = 0.065;
+                        const targetScale = 0.095; // Tăng kích thước ảnh nhỏ lên (trước là 0.065)
                         card.scale.x += (targetScale - card.scale.x) * 0.1;
                         card.scale.y += (targetScale - card.scale.y) * 0.1;
                         
@@ -2649,6 +2666,7 @@
             if (!landmarks) {
                 if (cursorEl) cursorEl.style.display = 'none';
                 prevHandX = null;
+                prevHandY = null;
                 handCursorVisible = false;
             }
 
@@ -2736,7 +2754,7 @@
                             let maxZ = -Infinity;
                             let closestIndex = -1;
                             memoryCards.forEach((card, index) => {
-                                const worldZ = -card.position.x * Math.sin(galaxyRotationY) + card.position.z * Math.cos(galaxyRotationY);
+                                const worldZ = -card.position.x * Math.sin(galaxyRotationY) + (card.position.y * Math.sin(galaxyRotationX) + card.position.z * Math.cos(galaxyRotationX)) * Math.cos(galaxyRotationY);
                                 if (worldZ > maxZ) {
                                     maxZ = worldZ;
                                     closestIndex = index;
@@ -2751,20 +2769,25 @@
                 }
                 wasPinching = pinching;
 
-                // 3. Cử chỉ mở 5 ngón di chuyển trái/phải -> Xoay quả cầu ảnh
+                // 3. Cử chỉ mở 5 ngón di chuyển trái/phải/lên/xuống -> Xoay quả cầu ảnh
                 if (isOpenPalm(landmarks) && !pinching) {
                     const currentHandX = (1 - landmarks[9].x) * window.innerWidth;
-                    if (prevHandX !== null) {
+                    const currentHandY = landmarks[9].y * window.innerHeight;
+                    if (prevHandX !== null && prevHandY !== null) {
                         const deltaX = currentHandX - prevHandX;
-                        // Lưu vận tốc xoay tỉ lệ với di chuyển vật lý
-                        rotationVelocity = deltaX * 0.0018;
+                        const deltaY = currentHandY - prevHandY;
+                        // Lưu vận tốc xoay tỉ lệ với di chuyển vật lý (tốc độ chậm lại bằng cách dùng hệ số 0.0006)
+                        rotationVelocityY = deltaX * 0.0006;
+                        rotationVelocityX = deltaY * 0.0006;
                     }
                     prevHandX = currentHandX;
+                    prevHandY = currentHandY;
                     if (focusedCardIndex < 0) {
-                        gestureStatusEl.textContent = "Di chuyển bàn tay mở để xoay quả cầu ảnh";
+                        gestureStatusEl.textContent = "Di chuyển bàn tay mở để xoay quả cầu ảnh (Trái/Phải/Lên/Xuống)";
                     }
                 } else {
                     prevHandX = null;
+                    prevHandY = null;
                     if (focusedCardIndex < 0) {
                         gestureStatusEl.textContent = "Mở lòng bàn tay vuốt để xoay quả cầu, chụm 2 ngón để phóng to";
                     }
