@@ -1151,20 +1151,10 @@
             // Vẽ lần đầu tiên (nền màu)
             drawCard();
 
-            // Tải ảnh thực tế
-            const img = new Image();
-            img.src = 'photo_sample.png';
-            img.onload = () => {
-                drawCard(img);
-            };
+            // Lưu lại hàm drawCard để cập nhật ảnh sau khi đã quét xong thư mục
+            texture.userData = { drawCard: drawCard };
 
             return texture;
-        }
-
-        // Tạo trước 6 texture khác nhau để tái sử dụng tối ưu bộ nhớ
-        const memoryTextures = [];
-        for (let i = 0; i < 6; i++) {
-            memoryTextures.push(createMemoryTexture(i));
         }
 
         const photoGroup = new THREE.Group();
@@ -1172,9 +1162,15 @@
         const cardGeometry = new THREE.PlaneGeometry(32, 46);
         const NUM_CARDS = 80;
 
+        // Tạo 80 texture riêng biệt cho 80 ảnh khác nhau
+        const memoryTextures = [];
+        for (let i = 0; i < NUM_CARDS; i++) {
+            memoryTextures.push(createMemoryTexture(i));
+        }
+
         for (let i = 0; i < NUM_CARDS; i++) {
             const material = new THREE.MeshBasicMaterial({
-                map: memoryTextures[i % memoryTextures.length],
+                map: memoryTextures[i],
                 transparent: true,
                 opacity: 0,
                 side: THREE.DoubleSide,
@@ -1204,6 +1200,81 @@
         }
         photoGroup.visible = false;
         scene.add(photoGroup);
+
+        // Danh sách lưu trữ các ảnh tải thành công từ thư mục anh/
+        const loadedUserImages = [];
+
+        function loadUserPhotosSequentially(index) {
+            if (index > NUM_CARDS) {
+                applyLoadedPhotosToCards();
+                return;
+            }
+            
+            const img = new Image();
+            img.src = `anh/${index}.jpg`;
+            img.onload = () => {
+                loadedUserImages.push(img);
+                loadUserPhotosSequentially(index + 1);
+            };
+            img.onerror = () => {
+                // Thử định dạng .png nếu .jpg lỗi
+                const pngImg = new Image();
+                pngImg.src = `anh/${index}.png`;
+                pngImg.onload = () => {
+                    loadedUserImages.push(pngImg);
+                    loadUserPhotosSequentially(index + 1);
+                };
+                pngImg.onerror = () => {
+                    // Thử định dạng .jpeg
+                    const jpegImg = new Image();
+                    jpegImg.src = `anh/${index}.jpeg`;
+                    jpegImg.onload = () => {
+                        loadedUserImages.push(jpegImg);
+                        loadUserPhotosSequentially(index + 1);
+                    };
+                    jpegImg.onerror = () => {
+                        // Thử định dạng .webp
+                        const webpImg = new Image();
+                        webpImg.src = `anh/${index}.webp`;
+                        webpImg.onload = () => {
+                            loadedUserImages.push(webpImg);
+                            loadUserPhotosSequentially(index + 1);
+                        };
+                        webpImg.onerror = () => {
+                            // Cả 4 định dạng đều lỗi -> coi như hết ảnh trong thư mục
+                            updateDebug(`Đã tìm thấy và tải xong ${loadedUserImages.length} ảnh tự chọn từ thư mục anh/`);
+                            applyLoadedPhotosToCards();
+                        };
+                    };
+                };
+            };
+        }
+
+        function applyLoadedPhotosToCards() {
+            if (loadedUserImages.length === 0) {
+                // Sử dụng ảnh mẫu mặc định nếu không có bất kỳ ảnh nào trong thư mục 'anh'
+                const defaultImg = new Image();
+                defaultImg.src = 'photo_sample.png';
+                defaultImg.onload = () => {
+                    updateDebug("Không tìm thấy ảnh tự chọn trong thư mục 'anh/', sử dụng ảnh mẫu mặc định.");
+                    for (let i = 0; i < NUM_CARDS; i++) {
+                        if (memoryTextures[i] && memoryTextures[i].userData && memoryTextures[i].userData.drawCard) {
+                            memoryTextures[i].userData.drawCard(defaultImg);
+                        }
+                    }
+                };
+            } else {
+                for (let i = 0; i < NUM_CARDS; i++) {
+                    const img = loadedUserImages[i % loadedUserImages.length];
+                    if (memoryTextures[i] && memoryTextures[i].userData && memoryTextures[i].userData.drawCard) {
+                        memoryTextures[i].userData.drawCard(img);
+                    }
+                }
+            }
+        }
+
+        // Kích hoạt việc quét và tải ảnh tự động
+        loadUserPhotosSequentially(1);
         updateDebug("Đang hiển thị hộp quà. Hãy nhấp vào hộp quà để mở.");
 
 
