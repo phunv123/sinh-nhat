@@ -2385,6 +2385,7 @@
                 }
                 photoGroup.rotation.y = galaxyRotationY;
                 photoGroup.rotation.x = galaxyRotationX;
+                photoGroup.updateMatrixWorld(); // Đồng bộ ngay lập tức ma trận 3D của nhóm ảnh
 
                 memoryCards.forEach((card, index) => {
                     if (currentMode !== 'PHOTO_GALAXY') {
@@ -2394,14 +2395,13 @@
 
                     const focused = index === focusedCardIndex;
                     if (focused) {
-                        // Tính toán tọa độ cục bộ tương đương thế giới (0, 0, 82) khi xoay theo cả trục Y và X
-                        const targetLX = -82 * Math.sin(galaxyRotationY);
-                        const targetLY = 82 * Math.cos(galaxyRotationY) * Math.sin(galaxyRotationX);
-                        const targetLZ = 82 * Math.cos(galaxyRotationY) * Math.cos(galaxyRotationX);
+                        // Sử dụng worldToLocal để chuyển đổi tọa độ thế giới (0, 0, 82) ngay trước camera về tọa độ cục bộ chuẩn xác nhất
+                        const targetLocal = new THREE.Vector3(0, 0, 82);
+                        photoGroup.worldToLocal(targetLocal);
 
-                        card.position.x += (targetLX - card.position.x) * 0.12;
-                        card.position.y += (targetLY - card.position.y) * 0.12;
-                        card.position.z += (targetLZ - card.position.z) * 0.12;
+                        card.position.x += (targetLocal.x - card.position.x) * 0.12;
+                        card.position.y += (targetLocal.y - card.position.y) * 0.12;
+                        card.position.z += (targetLocal.z - card.position.z) * 0.12;
 
                         card.scale.x += (3.0 - card.scale.x) * 0.12; // Phóng to lên 3.0 (trước là 2.25)
                         card.scale.y += (3.0 - card.scale.y) * 0.12;
