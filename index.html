@@ -1115,9 +1115,29 @@
                 ctx.fillStyle = 'rgba(255,255,255,0.92)';
                 ctx.fillRect(18, 18, canvas.width - 36, canvas.height - 36);
 
-                // Vẽ ảnh
+                // Vẽ ảnh (Áp dụng Object-Fit Cover thông minh bảo toàn tỉ lệ ảnh và tránh che đầu/mặt)
                 if (loadedImg) {
-                    ctx.drawImage(loadedImg, 30, 30, canvas.width - 60, canvas.height - 134);
+                    const targetX = 30;
+                    const targetY = 30;
+                    const targetW = canvas.width - 60;
+                    const targetH = canvas.height - 134;
+
+                    const imgW = loadedImg.width;
+                    const imgH = loadedImg.height;
+                    const imgRatio = imgW / imgH;
+                    const targetRatio = targetW / targetH;
+
+                    let sx = 0, sy = 0, sw = imgW, sh = imgH;
+                    if (imgRatio > targetRatio) {
+                        // Ảnh rộng hơn khung -> Cắt hai bên, căn giữa
+                        sw = imgH * targetRatio;
+                        sx = (imgW - sw) * 0.5;
+                    } else {
+                        // Ảnh cao hơn khung (ảnh chụp dọc) -> Cắt dưới, giữ lại phần đầu/mặt ở trên (chừa 12% lề trên)
+                        sh = imgW / targetRatio;
+                        sy = (imgH - sh) * 0.12; 
+                    }
+                    ctx.drawImage(loadedImg, sx, sy, sw, sh, targetX, targetY, targetW, targetH);
                 } else {
                     const inner = ctx.createLinearGradient(30, 30, canvas.width - 30, canvas.height - 104);
                     inner.addColorStop(0, p[0]);
