@@ -2658,6 +2658,27 @@
         const gesturePanelEl = document.getElementById('gesture-panel');
         const gestureToggleEl = document.getElementById('gesture-toggle');
         const gestureStatusEl = document.getElementById('gesture-status');
+        Object.defineProperty(gestureStatusEl, 'textContent', {
+            set: function(text) {
+                let icon = "";
+                const t = text.toLowerCase();
+                if (t.includes("vuốt") || t.includes("mở 5 ngón") || t.includes("mở lòng bàn tay")) {
+                    icon = "🖐️ ";
+                } else if (t.includes("nắm tay") || t.includes("gấp thư") || t.includes("gom ảnh") || t.includes("quay lại")) {
+                    icon = "✊ ";
+                } else if (t.includes("chụm 2 ngón") || t.includes("phóng to") || t.includes("thu nhỏ") || t.includes("đang xem")) {
+                    icon = "🤏 ";
+                } else if (t.includes("camera")) {
+                    icon = "📷 ";
+                } else if (t.includes("lỗi") || t.includes("không")) {
+                    icon = "❌ ";
+                } else if (t.includes("bánh") || t.includes("bung")) {
+                    icon = "🎂 ";
+                }
+                this.innerHTML = icon + text;
+            },
+            configurable: true
+        });
         const cameraPreviewEl = document.getElementById('camera-preview');
         const cakeTitleEl = document.getElementById('cake-title');
         const loadTime = Date.now();
